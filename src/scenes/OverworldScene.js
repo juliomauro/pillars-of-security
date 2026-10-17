@@ -8,9 +8,35 @@ const MOVE_DURATION = 150;
 
 const PLAYER_START = { col: 12, row: 9 };
 
-// Fixed map slots for a day's categories. DAYS currently has exactly 2
-// categories per day; a 3rd slot is here in case that changes later.
-const NPC_GRID_POSITIONS = [{ col: 6, row: 6 }, { col: 18, row: 6 }, { col: 12, row: 13 }];
+// One layout per DAYS entry, so each work day visually reads as a different
+// part of the office ("department") — different desk/furniture arrangement
+// and different spots for that day's two category NPCs. Obstacles are plain
+// blocked grid cells (desks/tables placeholder), same collision rule as NPCs.
+const DAY_LAYOUTS = [
+  {
+    // Day 1: open desk bullpen, two short rows with a walking lane between.
+    npcPositions: [{ col: 6, row: 4 }, { col: 18, row: 4 }],
+    obstacles: [
+      { col: 10, row: 12 }, { col: 11, row: 12 }, { col: 13, row: 12 }, { col: 14, row: 12 },
+      { col: 10, row: 14 }, { col: 11, row: 14 }, { col: 13, row: 14 }, { col: 14, row: 14 }
+    ]
+  },
+  {
+    // Day 2: reception-style counter blocking the center, walk around it.
+    npcPositions: [{ col: 4, row: 5 }, { col: 20, row: 5 }],
+    obstacles: [
+      { col: 10, row: 13 }, { col: 11, row: 13 }, { col: 12, row: 13 }, { col: 13, row: 13 }, { col: 14, row: 13 }
+    ]
+  },
+  {
+    // Day 3: two small meeting tables with a gap between them.
+    npcPositions: [{ col: 8, row: 3 }, { col: 16, row: 3 }],
+    obstacles: [
+      { col: 10, row: 12 }, { col: 11, row: 12 }, { col: 10, row: 13 }, { col: 11, row: 13 },
+      { col: 13, row: 12 }, { col: 14, row: 12 }, { col: 13, row: 13 }, { col: 14, row: 13 }
+    ]
+  }
+];
 
 // Decorative, non-interactive workers that wander a small patrol box so the
 // office doesn't feel frozen. Purely cosmetic — no gameplay effect.
@@ -32,6 +58,7 @@ class OverworldScene extends Phaser.Scene {
   preload() {
     this.generateTexture('floor', 0x16213e, TILE, TILE, 0x0f3460, 1);
     this.generateTexture('player', 0x4ecca3, 24, 24);
+    this.generateTexture('desk', 0x5c3a21, TILE, TILE, 0x3a2414, 2);
   }
 
   // Procedural placeholder art: a filled square, optionally with a border.
@@ -67,22 +94,33 @@ class OverworldScene extends Phaser.Scene {
     this.encounterLocked = false;
     this.npcs = [];
     this.ambientNpcs = [];
+    this.obstacles = [];
 
     const dayIndex = this.registry.get('dayIndex');
     const day = DAYS[dayIndex];
     const lastShownDayIndex = this.registry.get('lastShownDayIndex');
 
     if (dayIndex !== lastShownDayIndex) {
-      this.showDayBanner(dayIndex, day, () => this.setupMap(day));
+      this.showDayBanner(dayIndex, day, () => this.setupMap(dayIndex, day));
     } else {
-      this.setupMap(day);
+      this.setupMap(dayIndex, day);
     }
   }
 
-  setupMap(day) {
-    this.spawnDayNpcs(day);
+  setupMap(dayIndex, day) {
+    this.spawnObstacles(dayIndex);
+    this.spawnDayNpcs(dayIndex, day);
     this.spawnAmbientNpcs();
     this.add.text(16, 560, t(this, 'overworldHint'), { fontSize: '12px', color: '#aaaaaa' });
+  }
+
+  spawnObstacles(dayIndex) {
+    const layout = DAY_LAYOUTS[dayIndex] || DAY_LAYOUTS[0];
+    layout.obstacles.forEach(({ col, row }) => {
+      const pos = gridToPixel(col, row);
+      this.add.sprite(pos.x, pos.y, 'desk');
+      this.obstacles.push({ col, row });
+    });
   }
 
   drawFloor() {
@@ -115,11 +153,12 @@ class OverworldScene extends Phaser.Scene {
 
   // Spawns one NPC per category still pending today, so the player picks
   // which one to tackle first. Finished categories show a checkmark instead.
-  spawnDayNpcs(day) {
+  spawnDayNpcs(dayIndex, day) {
     const queueIndex = this.registry.get('categoryQueueIndex');
+    const npcPositions = (DAY_LAYOUTS[dayIndex] || DAY_LAYOUTS[0]).npcPositions;
 
     day.categories.forEach((categoryId, i) => {
-      const gridPos = NPC_GRID_POSITIONS[i] || { col: 12, row: 15 };
+      const gridPos = npcPositions[i] || { col: 12, row: 15 };
       const pos = gridToPixel(gridPos.col, gridPos.row);
       const category = SCENARIO_CATEGORIES[categoryId];
       const done = queueIndex[categoryId] >= SCENARIOS_PER_CATEGORY;
@@ -178,7 +217,8 @@ class OverworldScene extends Phaser.Scene {
     const occupied =
       (this.playerGrid.col === targetCol && this.playerGrid.row === targetRow) ||
       this.npcs.some(n => n.col === targetCol && n.row === targetRow) ||
-      this.ambientNpcs.some(n => n !== npc && n.col === targetCol && n.row === targetRow);
+      this.ambientNpcs.some(n => n !== npc && n.col === targetCol && n.row === targetRow) ||
+      this.obstacles.some(o => o.col === targetCol && o.row === targetRow);
     if (occupied) return;
 
     npc.col = targetCol;
@@ -225,9 +265,12 @@ class OverworldScene extends Phaser.Scene {
       return;
     }
 
-    // Ambient NPCs are solid too — just blocked, no interaction.
+    // Ambient NPCs and obstacles (desks/furniture) are solid too.
     const blockedByAmbient = this.ambientNpcs.some(n => n.col === targetCol && n.row === targetRow);
     if (blockedByAmbient) return;
+
+    const blockedByObstacle = this.obstacles.some(o => o.col === targetCol && o.row === targetRow);
+    if (blockedByObstacle) return;
 
     this.isMoving = true;
     this.playerGrid = { col: targetCol, row: targetRow };
