@@ -175,6 +175,12 @@ class OverworldScene extends Phaser.Scene {
     const targetRow = Phaser.Math.Clamp(npc.row + dRow, npc.boxRows[0], npc.boxRows[1]);
     if (targetCol === npc.col && targetRow === npc.row) return;
 
+    const occupied =
+      (this.playerGrid.col === targetCol && this.playerGrid.row === targetRow) ||
+      this.npcs.some(n => n.col === targetCol && n.row === targetRow) ||
+      this.ambientNpcs.some(n => n !== npc && n.col === targetCol && n.row === targetRow);
+    if (occupied) return;
+
     npc.col = targetCol;
     npc.row = targetRow;
     const dest = gridToPixel(targetCol, targetRow);
@@ -218,6 +224,10 @@ class OverworldScene extends Phaser.Scene {
       this.startEncounter(bumpedNpc.categoryId);
       return;
     }
+
+    // Ambient NPCs are solid too — just blocked, no interaction.
+    const blockedByAmbient = this.ambientNpcs.some(n => n.col === targetCol && n.row === targetRow);
+    if (blockedByAmbient) return;
 
     this.isMoving = true;
     this.playerGrid = { col: targetCol, row: targetRow };
