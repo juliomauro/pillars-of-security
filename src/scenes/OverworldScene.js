@@ -8,26 +8,27 @@ const MOVE_DURATION = 150;
 
 const PLAYER_START = { col: 12, row: 9 };
 
-// Rooms the office is made of, connected by doors instead of being gated
-// behind a "day" banner. Each room keeps its own furniture layout and holds
-// two of the six categories. Doors are plain walkable tiles the player must
-// stand on and press Action on to cross — walking onto one does nothing by
-// itself, same as the original request.
+// Five rooms, connected in a line by doors. Rooms are just a realistic
+// setting — security issues happen everywhere in a company, so the same six
+// scenario categories are simply spread across these rooms rather than each
+// room having its own dedicated topic. Doors are plain walkable tiles the
+// player must stand on and press Action on to cross.
 const ROOMS = [
   {
-    name: 'Mesas Abertas',
+    name: 'Sala de TI',
+    categories: ['phishing', 'usb'],
     npcPositions: [{ col: 6, row: 4 }, { col: 18, row: 4 }],
     obstacles: [
-      { col: 10, row: 12 }, { col: 11, row: 12 }, { col: 13, row: 12 }, { col: 14, row: 12 },
-      { col: 10, row: 14 }, { col: 11, row: 14 }, { col: 13, row: 14 }, { col: 14, row: 14 }
+      { col: 10, row: 12 }, { col: 11, row: 12 }, { col: 13, row: 12 }, { col: 14, row: 12 }
     ],
     doors: [{ col: 24, row: 8, toRoom: 1, entryCol: 1, entryRow: 8 }]
   },
   {
-    name: 'Recepção',
-    npcPositions: [{ col: 4, row: 5 }, { col: 20, row: 5 }],
+    name: 'Sala da Diretoria',
+    categories: ['social'],
+    npcPositions: [{ col: 12, row: 5 }],
     obstacles: [
-      { col: 10, row: 13 }, { col: 11, row: 13 }, { col: 12, row: 13 }, { col: 13, row: 13 }, { col: 14, row: 13 }
+      { col: 10, row: 12 }, { col: 11, row: 12 }, { col: 12, row: 12 }, { col: 13, row: 12 }, { col: 14, row: 12 }
     ],
     doors: [
       { col: 0, row: 8, toRoom: 0, entryCol: 23, entryRow: 8 },
@@ -35,13 +36,37 @@ const ROOMS = [
     ]
   },
   {
-    name: 'Sala de Reunião',
-    npcPositions: [{ col: 8, row: 3 }, { col: 16, row: 3 }],
+    name: 'Refeitório',
+    categories: ['tailgating'],
+    npcPositions: [{ col: 12, row: 5 }],
     obstacles: [
-      { col: 10, row: 12 }, { col: 11, row: 12 }, { col: 10, row: 13 }, { col: 11, row: 13 },
-      { col: 13, row: 12 }, { col: 14, row: 12 }, { col: 13, row: 13 }, { col: 14, row: 13 }
+      { col: 9, row: 12 }, { col: 10, row: 12 }, { col: 14, row: 12 }, { col: 15, row: 12 }
     ],
-    doors: [{ col: 0, row: 8, toRoom: 1, entryCol: 23, entryRow: 8 }]
+    doors: [
+      { col: 0, row: 8, toRoom: 1, entryCol: 23, entryRow: 8 },
+      { col: 24, row: 8, toRoom: 3, entryCol: 1, entryRow: 8 }
+    ]
+  },
+  {
+    name: 'Contabilidade',
+    categories: ['passwords'],
+    npcPositions: [{ col: 12, row: 5 }],
+    obstacles: [
+      { col: 10, row: 12 }, { col: 11, row: 12 }, { col: 13, row: 12 }, { col: 14, row: 12 }
+    ],
+    doors: [
+      { col: 0, row: 8, toRoom: 2, entryCol: 23, entryRow: 8 },
+      { col: 24, row: 8, toRoom: 4, entryCol: 1, entryRow: 8 }
+    ]
+  },
+  {
+    name: 'RH',
+    categories: ['links'],
+    npcPositions: [{ col: 12, row: 5 }],
+    obstacles: [
+      { col: 10, row: 12 }, { col: 11, row: 12 }, { col: 12, row: 12 }, { col: 13, row: 12 }
+    ],
+    doors: [{ col: 0, row: 8, toRoom: 3, entryCol: 23, entryRow: 8 }]
   }
 ];
 
@@ -55,10 +80,6 @@ const AMBIENT_STEP_DELAY = [1200, 2600]; // ms range between ambient steps
 
 function gridToPixel(col, row) {
   return { x: col * TILE + TILE / 2, y: row * TILE + TILE / 2 };
-}
-
-function roomCategories(roomIndex) {
-  return DAYS[roomIndex] ? DAYS[roomIndex].categories : [];
 }
 
 class OverworldScene extends Phaser.Scene {
@@ -105,7 +126,7 @@ class OverworldScene extends Phaser.Scene {
     this.actionJustDown = false;
 
     this.add.text(16, 16, 'Pillars of Security', { fontSize: '14px', color: '#ffffff' });
-    renderHearts(this, 596, 16, this.registry.get('halfHearts') ?? 8);
+    renderHearts(this, 596, 16, this.registry.get('halfHearts') ?? MAX_HALF_HEARTS);
     this.add.text(596, 46, `${t(this, 'scoreLabel')}: ${this.registry.get('score') || 0}`, {
       fontSize: '14px', color: '#ffffff'
     });
@@ -122,7 +143,7 @@ class OverworldScene extends Phaser.Scene {
 
     this.spawnObstacles(room);
     this.spawnDoors(room);
-    this.spawnRoomNpcs(roomIndex, room);
+    this.spawnRoomNpcs(room);
     this.spawnAmbientNpcs();
     this.add.text(16, 560, t(this, 'overworldHint'), { fontSize: '12px', color: '#aaaaaa' });
   }
@@ -153,11 +174,10 @@ class OverworldScene extends Phaser.Scene {
 
   // Spawns one NPC per category still pending in this room. Finished
   // categories show a checkmark instead — the player can revisit freely.
-  spawnRoomNpcs(roomIndex, room) {
+  spawnRoomNpcs(room) {
     const queueIndex = this.registry.get('categoryQueueIndex');
-    const categories = roomCategories(roomIndex);
 
-    categories.forEach((categoryId, i) => {
+    room.categories.forEach((categoryId, i) => {
       const gridPos = room.npcPositions[i] || { col: 12, row: 15 };
       const pos = gridToPixel(gridPos.col, gridPos.row);
       const category = SCENARIO_CATEGORIES[categoryId];

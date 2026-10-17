@@ -231,13 +231,6 @@ const SCENARIO_CATEGORIES = {
   }
 };
 
-// Six categories grouped into three work days, two categories each.
-const DAYS = [
-  { id: 1, name: 'Dia 1 de Trabalho', categories: ['phishing', 'social'] },
-  { id: 2, name: 'Dia 2 de Trabalho', categories: ['tailgating', 'usb'] },
-  { id: 3, name: 'Dia 3 de Trabalho', categories: ['passwords', 'links'] }
-];
-
 const SCENARIOS_PER_CATEGORY = 3;
 
 function shuffle(array) {

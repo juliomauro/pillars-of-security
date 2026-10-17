@@ -86,9 +86,9 @@ class EncounterScene extends Phaser.Scene {
     if (success) {
       this.registry.set('score', (this.registry.get('score') || 0) + 100);
       this.registry.set('correctCount', (this.registry.get('correctCount') || 0) + 1);
-      this.registry.set('halfHearts', Math.min(8, (this.registry.get('halfHearts') ?? 8) + 1));
+      this.registry.set('halfHearts', Math.min(MAX_HALF_HEARTS, (this.registry.get('halfHearts') ?? MAX_HALF_HEARTS) + 1));
     } else {
-      this.registry.set('halfHearts', Math.max(0, (this.registry.get('halfHearts') ?? 8) - 2));
+      this.registry.set('halfHearts', Math.max(0, (this.registry.get('halfHearts') ?? MAX_HALF_HEARTS) - 2));
     }
 
     const queueIndex = this.registry.get('categoryQueueIndex');
@@ -158,7 +158,7 @@ class EncounterScene extends Phaser.Scene {
   }
 
   advance() {
-    if ((this.registry.get('halfHearts') ?? 8) <= 0) {
+    if ((this.registry.get('halfHearts') ?? MAX_HALF_HEARTS) <= 0) {
       this.scene.start('Results', { reason: 'gameover' });
       return;
     }

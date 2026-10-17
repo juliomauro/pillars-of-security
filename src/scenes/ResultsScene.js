@@ -1,11 +1,13 @@
-function computeRank(correctCount, attemptedCount) {
-  if (attemptedCount === 0) return 'E';
+function computeRank(correctCount, attemptedCount, halfHearts, isGameOver) {
+  if (isGameOver || attemptedCount === 0) return 'E';
   const pct = correctCount / attemptedCount;
-  if (pct >= 1) return 'S';
-  if (pct >= 0.9) return 'A';
-  if (pct >= 0.75) return 'B';
-  if (pct >= 0.5) return 'C';
-  if (pct >= 0.25) return 'D';
+  // S requires both perfect accuracy and finishing with full hearts — a
+  // mid-run mistake that later got healed back to full still isn't a flawless run.
+  if (pct >= 1 && halfHearts >= MAX_HALF_HEARTS) return 'S';
+  if (pct >= 0.85) return 'A';
+  if (pct >= 0.70) return 'B';
+  if (pct >= 0.50) return 'C';
+  if (pct >= 0.30) return 'D';
   return 'E';
 }
 
@@ -25,7 +27,7 @@ class ResultsScene extends Phaser.Scene {
     const correctCount = this.registry.get('correctCount') || 0;
     const attemptedCount = this.registry.get('attemptedCount') || 0;
     const categoryStats = this.registry.get('categoryStats') || {};
-    const rank = computeRank(correctCount, attemptedCount);
+    const rank = computeRank(correctCount, attemptedCount, halfHearts, reason === 'gameover');
 
     const title = reason === 'gameover' ? t(this, 'gameOverTitle') : t(this, 'clearedTitle');
     const sub = reason === 'gameover' ? t(this, 'gameOverSub') : t(this, 'clearedSub');
@@ -37,7 +39,7 @@ class ResultsScene extends Phaser.Scene {
     this.add.text(400, 118, `${t(this, 'scoreLabel')}: ${score}`, { fontSize: '15px', color: '#ffffff' }).setOrigin(0.5);
 
     renderHearts(this, 338, 148, halfHearts);
-    this.add.text(400, 180, `${t(this, 'livesLabel')}: ${halfHearts / 2}/4`, { fontSize: '11px', color: '#aaaaaa' }).setOrigin(0.5);
+    this.add.text(400, 180, `${t(this, 'livesLabel')}: ${halfHearts / 2}/${MAX_HALF_HEARTS / 2}`, { fontSize: '11px', color: '#aaaaaa' }).setOrigin(0.5);
 
     this.add.text(400, 205, t(this, 'categoryBreakdown'), { fontSize: '13px', color: '#4ecca3' }).setOrigin(0.5);
     this.renderCategoryBreakdown(categoryStats);

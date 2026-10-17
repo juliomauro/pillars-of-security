@@ -1,0 +1,158 @@
+================================================================================
+GAME DESIGN DOCUMENT (GDD) - CORPORATE OFFICE QUEST
+================================================================================
+
+1. VISÃO GERAL DO PROJETO
+--------------------------------------------------------------------------------
+- Nome Provisório   : pillars of security
+- Desenvolvedora    : Sinch Security Team
+- Ideia / criação.  : Julio Mauro
+- Gênero            : Top-down 2D / Quiz de Exploração Corporativa
+- Plataforma-Alvo   : Web (Navegadores desktop)
+- Estilo Visual     : Pixel Art clássico (estilo 16-bit de escritório)
+- Público-Alvo      : Colaboradores da empresa / Treinamentos internos
+- Proposta Central  : O jogador explora salas temáticas da empresa, responde a
+                      perguntas específicas de cada setor e gerencia suas vidas
+                      para obter a melhor classificação de desempenho (Rank S).
+
+
+2. ESQUEMA DE CONTROLES & INPUTS
+--------------------------------------------------------------------------------
+- Movimentação : Teclas Direcionais (Setas) OU W / A / S / D
+- Ação / Usar  : Barra de Espaço OU Tecla Z (interage com itens e menus)
+- Menu de Pausa: Tecla ESC OU Tecla P (abre opções rápidas de suspensão)
+
+
+3. TELAS & NAVEGAÇÃO DE INTERFACE (UI/UX)
+--------------------------------------------------------------------------------
+3.1. Tela de Abertura:
+  - Elementos Visuais : Logotipo da Empresa, Título do Jogo.
+  - Opções            : [ Início ] | [ Ajuda ].
+
+3.2. Tela de Ajuda:
+  - Explicação dos controles (W/A/S/D, Espaço/Z, ESC).
+  - Regras de corações (dano de 1.0 por erro, recuperação de 0.5 por acerto).
+  - Explicação sobre as salas e a busca pelo Rank S.
+  - Botão: [ Voltar ao Menu ].
+
+3.3. Entrada de Dados:
+  - Campo de texto para digitação do Nome do Jogador.
+  - Botão: [ Começar Jogo ].
+
+3.4. HUD em Tempo Real (Barra Superior Fixa):
+  +----------------------------------------------------------------------------+
+  | NOME: [player_name] | SALA: [room_name] | VIDAS: ❤️❤️❤️ | PROGRESSO: 04/15 |
+  +----------------------------------------------------------------------------+
+
+3.5. Menu de Pausa (Modal suspenso via ESC / P):
+  - Opções: [ Continuar ] | [ Ver Controles ] | [ Reiniciar ] | [ Sair ao Menu ].
+
+3.6. Tela de Resultados (Conclusão ou Game Over):
+  - Exibição de: Nome do Jogador, Rank Final (E até S), Porcentagem de Acertos.
+  - Badge de Conquista: "Movido a Café ☕" (exibida se consumiu as 2 doses).
+  - Ações:
+    * Se Vitória   : [ Baixar Imagem / Certificado ] | [ Jogar Novamente ].
+    * Se Derrota   : [ Tentar Novamente ] | [ Voltar ao Menu ].
+
+
+4. CORE LOOP & REGRAS DE GAMEPLAY
+--------------------------------------------------------------------------------
+4.1. Ciclo Central de Jogo:
+  [ Entrar na Sala ] ──► [ Aproximar do Item ] ──► [ Pressionar Ação ]
+          ▲                                               │
+          │                                               ▼
+  [ Continuar Exploração ] ◄── [ Atualizar Vidas ] ◄── [ Responder Quiz ]
+
+4.2. Condições de Fim de Jogo:
+  - Vitória : Responder a todas as perguntas do mapa com vida_atual > 0.
+  - Derrota : vida_atual atingir 0 (Game Over instantâneo, Rank E).
+
+4.3. Economia de Vidas & Teto (Cap):
+  - Vida Inicial : 3.0 Corações cheios.
+  - Vida Máxima  : 3.0 Corações (teto absoluto).
+  - Erro         : Perde 1.0 Coração.
+  - Acerto       : Recupera +0.5 Coração (fórmula: min(vida_atual + 0.5, 3.0)).
+
+4.4. Trava de Repetição do Item (Anti-Farming):
+  - Todo item de quiz possui a flag booleana `is_answered = false`.
+  - Ao responder à pergunta, `is_answered` passa para `true`.
+  - O item ganha estado visual inativo (sprite acinzentado + ícone check verde).
+  - O gatilho de colisão de ação é desativado para aquele item.
+
+
+5. ARQUITETURA DAS FASES (LEVEL DESIGN)
+--------------------------------------------------------------------------------
+O cenário é um escritório contínuo com movimentação livre entre 5 salas:
+
+- Sala da TI:
+  * Itens : Servidor em rack, workstation ou roteador.
+  * Tema  : Segurança da informação, senhas, phishing e uso de dispositivos.
+
+- Sala da Diretoria:
+  * Itens : Mesa de reuniões, projetor ou pasta confidencial.
+  * Tema  : Governança, compliance, visão estratégica e metas globais.
+
+- Refeitório / Cozinha:
+  * Itens : Geladeira comunitária, mesa de lanche e Cafeteira.
+  * Tema  : Ergonomia, convivência, descarte correto de lixo e bem-estar.
+
+- Sala da Contabilidade:
+  * Itens : Calculadora, balancete na mesa ou cofre.
+  * Tema  : Notas fiscais, relatórios de despesas, reembolsos e integridade.
+
+- Sala do RH:
+  * Itens : Quadro de avisos, fichário ou mesa de entrevistas.
+  * Tema  : Políticas internas, diversidade, conduta e benefícios.
+
+
+6. MECÂNICA DE EASTER EGG (MÁQUINA DE CAFÉ)
+--------------------------------------------------------------------------------
+- Localização : Cozinha / Refeitório.
+- Variável    : `cafe_count` (inicia em 0, máximo 2).
+- Comportamento Visual:
+  * Enquanto `cafe_count < 2`: Cafeteira com partículas animadas de vapor subindo.
+  * Quando `cafe_count == 2` : Vapor cessa; cafeteira fica visualmente inerte.
+- Interação:
+  * Se `cafe_count < 2`:
+    - Incrementa `cafe_count += 1`.
+    - Recupera +0.5 Coração: `vida_atual = min(vida_atual + 0.5, 3.0)`.
+    - Toca efeito sonoro de gole/xícara (SFX Slurp).
+    - Exibe balão flutuante: "+0.5 Vida recuperada!".
+  * Se `cafe_count >= 2`:
+    - Não altera a vida.
+    - Exibe diálogo: "A cafeteira está vazia... já tomou café demais hoje!".
+
+
+7. SISTEMA DE CLASSIFICAÇÃO (RANKING DE E ATÉ S)
+--------------------------------------------------------------------------------
+Cálculo base: `precisao = (acertos / total_perguntas) * 100`
+
+- RANK S (Perfeição Absoluta):
+  * Critério: precisao == 100% E vida_atual == 3.0 (sem erros finais).
+- RANK A (Excelente):
+  * Critério: 85% <= precisao < 100% e terminou vivo.
+- RANK B (Bom Desempenho):
+  * Critério: 70% <= precisao < 85% e terminou vivo.
+- RANK C (Regular):
+  * Critério: 50% <= precisao < 70% e terminou vivo.
+- RANK D (Insuficiente):
+  * Critério: 30% <= precisao < 50% e terminou vivo.
+- RANK E (Crítico / Reprovado):
+  * Critério: precisao < 30% OU disparado por Game Over (vida_atual <= 0).
+
+
+8. ASSETS & PACOTE DE ÁUDIO REQUERIDOS
+--------------------------------------------------------------------------------
+- Sprites:
+  * Personagem (andando em 4 direções: cima, baixo, esquerda, direita).
+  * Itens interativos ativos e inativos (computador, balancete, projetor).
+  * Cafeteira com e sem fumaça.
+  * Ícones de corações: Cheio (❤️), Meio (💔/coração cortado) e Vazio (🖤).
+- Efeitos Sonoros (SFX):
+  * Passos do personagem.
+  * Interação / Abrir menu.
+  * Resposta correta (ding positivo).
+  * Resposta errada (buzzer negativo).
+  * Tomar café (gole/xícara).
+  * Game Over e Fanfarra de Vitória.
+================================================================================

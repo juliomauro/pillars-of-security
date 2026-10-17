@@ -43,7 +43,7 @@ class StartScene extends Phaser.Scene {
     ).setOrigin(0.5);
 
     this.makeButton(400, 400, t(this, 'start'), () => {
-      this.registry.set('halfHearts', 8);
+      this.registry.set('halfHearts', MAX_HALF_HEARTS);
       this.registry.set('score', 0);
       this.registry.set('attemptedCount', 0);
       this.registry.set('correctCount', 0);

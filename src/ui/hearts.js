@@ -1,6 +1,9 @@
+// Single source of truth for max lives: 3 full hearts.
+const MAX_HALF_HEARTS = 6;
+
 // Renders a row of heart icons for `halfHearts` out of `maxHalfHearts`.
 // Each heart slot is worth 2 half-points: full (both), half (one), empty (none).
-function renderHearts(scene, x, y, halfHearts, maxHalfHearts = 8) {
+function renderHearts(scene, x, y, halfHearts, maxHalfHearts = MAX_HALF_HEARTS) {
   const totalHearts = maxHalfHearts / 2;
   const texts = [];
   for (let i = 0; i < totalHearts; i++) {
