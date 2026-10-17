@@ -36,9 +36,11 @@ const ROOMS = [
     ]
   },
   {
+    // No quiz category on purpose — reserved for the future coffee-machine
+    // easter egg (heals half a heart, limited uses), not a question room.
     name: 'Refeitório',
-    categories: ['tailgating'],
-    npcPositions: [{ col: 12, row: 5 }],
+    categories: [],
+    npcPositions: [],
     obstacles: [
       { col: 9, row: 12 }, { col: 10, row: 12 }, { col: 14, row: 12 }, { col: 15, row: 12 }
     ],
@@ -61,8 +63,8 @@ const ROOMS = [
   },
   {
     name: 'RH',
-    categories: ['links'],
-    npcPositions: [{ col: 12, row: 5 }],
+    categories: ['links', 'tailgating'],
+    npcPositions: [{ col: 8, row: 5 }, { col: 16, row: 5 }],
     obstacles: [
       { col: 10, row: 12 }, { col: 11, row: 12 }, { col: 12, row: 12 }, { col: 13, row: 12 }
     ],
