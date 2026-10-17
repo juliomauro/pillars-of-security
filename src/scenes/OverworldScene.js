@@ -8,33 +8,40 @@ const MOVE_DURATION = 150;
 
 const PLAYER_START = { col: 12, row: 9 };
 
-// One layout per DAYS entry, so each work day visually reads as a different
-// part of the office ("department") — different desk/furniture arrangement
-// and different spots for that day's two category NPCs. Obstacles are plain
-// blocked grid cells (desks/tables placeholder), same collision rule as NPCs.
-const DAY_LAYOUTS = [
+// Rooms the office is made of, connected by doors instead of being gated
+// behind a "day" banner. Each room keeps its own furniture layout and holds
+// two of the six categories. Doors are plain walkable tiles the player must
+// stand on and press Action on to cross — walking onto one does nothing by
+// itself, same as the original request.
+const ROOMS = [
   {
-    // Day 1: open desk bullpen, two short rows with a walking lane between.
+    name: 'Mesas Abertas',
     npcPositions: [{ col: 6, row: 4 }, { col: 18, row: 4 }],
     obstacles: [
       { col: 10, row: 12 }, { col: 11, row: 12 }, { col: 13, row: 12 }, { col: 14, row: 12 },
       { col: 10, row: 14 }, { col: 11, row: 14 }, { col: 13, row: 14 }, { col: 14, row: 14 }
-    ]
+    ],
+    doors: [{ col: 24, row: 8, toRoom: 1, entryCol: 1, entryRow: 8 }]
   },
   {
-    // Day 2: reception-style counter blocking the center, walk around it.
+    name: 'Recepção',
     npcPositions: [{ col: 4, row: 5 }, { col: 20, row: 5 }],
     obstacles: [
       { col: 10, row: 13 }, { col: 11, row: 13 }, { col: 12, row: 13 }, { col: 13, row: 13 }, { col: 14, row: 13 }
+    ],
+    doors: [
+      { col: 0, row: 8, toRoom: 0, entryCol: 23, entryRow: 8 },
+      { col: 24, row: 8, toRoom: 2, entryCol: 1, entryRow: 8 }
     ]
   },
   {
-    // Day 3: two small meeting tables with a gap between them.
+    name: 'Sala de Reunião',
     npcPositions: [{ col: 8, row: 3 }, { col: 16, row: 3 }],
     obstacles: [
       { col: 10, row: 12 }, { col: 11, row: 12 }, { col: 10, row: 13 }, { col: 11, row: 13 },
       { col: 13, row: 12 }, { col: 14, row: 12 }, { col: 13, row: 13 }, { col: 14, row: 13 }
-    ]
+    ],
+    doors: [{ col: 0, row: 8, toRoom: 1, entryCol: 23, entryRow: 8 }]
   }
 ];
 
@@ -50,6 +57,10 @@ function gridToPixel(col, row) {
   return { x: col * TILE + TILE / 2, y: row * TILE + TILE / 2 };
 }
 
+function roomCategories(roomIndex) {
+  return DAYS[roomIndex] ? DAYS[roomIndex].categories : [];
+}
+
 class OverworldScene extends Phaser.Scene {
   constructor() {
     super('Overworld');
@@ -59,6 +70,7 @@ class OverworldScene extends Phaser.Scene {
     this.generateTexture('floor', 0x16213e, TILE, TILE, 0x0f3460, 1);
     this.generateTexture('player', 0x4ecca3, 24, 24);
     this.generateTexture('desk', 0x5c3a21, TILE, TILE, 0x3a2414, 2);
+    this.generateTexture('door', 0xf5d76e, TILE, TILE, 0xb8860b, 2);
   }
 
   // Procedural placeholder art: a filled square, optionally with a border.
@@ -77,13 +89,20 @@ class OverworldScene extends Phaser.Scene {
   create() {
     this.drawFloor();
 
-    const start = gridToPixel(PLAYER_START.col, PLAYER_START.row);
+    const roomIndex = this.registry.get('currentRoom') ?? 0;
+    const pendingEntry = this.registry.get('pendingEntry');
+    const spawn = pendingEntry || PLAYER_START;
+    this.registry.set('pendingEntry', null);
+
+    const start = gridToPixel(spawn.col, spawn.row);
     this.player = this.add.sprite(start.x, start.y, 'player');
-    this.playerGrid = { col: PLAYER_START.col, row: PLAYER_START.row };
+    this.playerGrid = { col: spawn.col, row: spawn.row };
     this.isMoving = false;
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = this.input.keyboard.addKeys('W,A,S,D');
+    this.actionKeys = this.input.keyboard.addKeys({ space: 'SPACE', enter: 'ENTER' });
+    this.actionJustDown = false;
 
     this.add.text(16, 16, 'Pillars of Security', { fontSize: '14px', color: '#ffffff' });
     renderHearts(this, 596, 16, this.registry.get('halfHearts') ?? 8);
@@ -95,32 +114,17 @@ class OverworldScene extends Phaser.Scene {
     this.npcs = [];
     this.ambientNpcs = [];
     this.obstacles = [];
+    this.doors = [];
 
-    const dayIndex = this.registry.get('dayIndex');
-    const day = DAYS[dayIndex];
-    const lastShownDayIndex = this.registry.get('lastShownDayIndex');
+    this.roomIndex = roomIndex;
+    const room = ROOMS[roomIndex];
+    this.add.text(400, 16, room.name, { fontSize: '14px', color: '#4ecca3' }).setOrigin(0.5, 0);
 
-    if (dayIndex !== lastShownDayIndex) {
-      this.showDayBanner(dayIndex, day, () => this.setupMap(dayIndex, day));
-    } else {
-      this.setupMap(dayIndex, day);
-    }
-  }
-
-  setupMap(dayIndex, day) {
-    this.spawnObstacles(dayIndex);
-    this.spawnDayNpcs(dayIndex, day);
+    this.spawnObstacles(room);
+    this.spawnDoors(room);
+    this.spawnRoomNpcs(roomIndex, room);
     this.spawnAmbientNpcs();
     this.add.text(16, 560, t(this, 'overworldHint'), { fontSize: '12px', color: '#aaaaaa' });
-  }
-
-  spawnObstacles(dayIndex) {
-    const layout = DAY_LAYOUTS[dayIndex] || DAY_LAYOUTS[0];
-    layout.obstacles.forEach(({ col, row }) => {
-      const pos = gridToPixel(col, row);
-      this.add.sprite(pos.x, pos.y, 'desk');
-      this.obstacles.push({ col, row });
-    });
   }
 
   drawFloor() {
@@ -131,34 +135,30 @@ class OverworldScene extends Phaser.Scene {
     }
   }
 
-  showDayBanner(dayIndex, day, onDismiss) {
-    const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.85).setDepth(10);
-    const title = this.add.text(400, 250, day.name, { fontSize: '26px', color: '#4ecca3' }).setOrigin(0.5).setDepth(11);
-    const categoryNames = day.categories.map(id => SCENARIO_CATEGORIES[id].name).join(' & ');
-    const sub = this.add.text(400, 300, categoryNames, { fontSize: '14px', color: '#ffffff' }).setOrigin(0.5).setDepth(11);
-
-    const btn = this.add.text(400, 370, t(this, 'start'), {
-      fontSize: '14px', color: '#ffffff', backgroundColor: '#0f3460', padding: { x: 14, y: 8 }
-    }).setOrigin(0.5).setDepth(11).setInteractive({ useHandCursor: true });
-
-    btn.on('pointerdown', () => {
-      this.registry.set('lastShownDayIndex', dayIndex);
-      overlay.destroy();
-      title.destroy();
-      sub.destroy();
-      btn.destroy();
-      onDismiss();
+  spawnObstacles(room) {
+    room.obstacles.forEach(({ col, row }) => {
+      const pos = gridToPixel(col, row);
+      this.add.sprite(pos.x, pos.y, 'desk');
+      this.obstacles.push({ col, row });
     });
   }
 
-  // Spawns one NPC per category still pending today, so the player picks
-  // which one to tackle first. Finished categories show a checkmark instead.
-  spawnDayNpcs(dayIndex, day) {
-    const queueIndex = this.registry.get('categoryQueueIndex');
-    const npcPositions = (DAY_LAYOUTS[dayIndex] || DAY_LAYOUTS[0]).npcPositions;
+  spawnDoors(room) {
+    room.doors.forEach(door => {
+      const pos = gridToPixel(door.col, door.row);
+      this.add.sprite(pos.x, pos.y, 'door');
+      this.doors.push(door);
+    });
+  }
 
-    day.categories.forEach((categoryId, i) => {
-      const gridPos = npcPositions[i] || { col: 12, row: 15 };
+  // Spawns one NPC per category still pending in this room. Finished
+  // categories show a checkmark instead — the player can revisit freely.
+  spawnRoomNpcs(roomIndex, room) {
+    const queueIndex = this.registry.get('categoryQueueIndex');
+    const categories = roomCategories(roomIndex);
+
+    categories.forEach((categoryId, i) => {
+      const gridPos = room.npcPositions[i] || { col: 12, row: 15 };
       const pos = gridToPixel(gridPos.col, gridPos.row);
       const category = SCENARIO_CATEGORIES[categoryId];
       const done = queueIndex[categoryId] >= SCENARIOS_PER_CATEGORY;
@@ -230,10 +230,29 @@ class OverworldScene extends Phaser.Scene {
   startEncounter(categoryId) {
     if (this.encounterLocked) return;
     this.encounterLocked = true;
+    // Returning from the encounter should drop the player back where they
+    // were, not reset to the room's default spawn point.
+    this.registry.set('pendingEntry', { col: this.playerGrid.col, row: this.playerGrid.row });
     this.scene.start('Encounter', { categoryId });
   }
 
+  useDoor(door) {
+    if (this.encounterLocked) return;
+    this.encounterLocked = true;
+    this.registry.set('currentRoom', door.toRoom);
+    this.registry.set('pendingEntry', { col: door.entryCol, row: door.entryRow });
+    this.scene.start('Overworld');
+  }
+
   update() {
+    const actionDown = this.actionKeys.space.isDown || this.actionKeys.enter.isDown;
+    if (actionDown && !this.actionJustDown) {
+      this.actionJustDown = true;
+      this.tryUseDoorHere();
+    } else if (!actionDown) {
+      this.actionJustDown = false;
+    }
+
     if (this.isMoving) return;
 
     const left = this.cursors.left.isDown || this.wasd.A.isDown;
@@ -253,6 +272,11 @@ class OverworldScene extends Phaser.Scene {
     }
   }
 
+  tryUseDoorHere() {
+    const door = this.doors.find(d => d.col === this.playerGrid.col && d.row === this.playerGrid.row);
+    if (door) this.useDoor(door);
+  }
+
   tryMove(dCol, dRow) {
     const targetCol = this.playerGrid.col + dCol;
     const targetRow = this.playerGrid.row + dRow;
@@ -265,7 +289,9 @@ class OverworldScene extends Phaser.Scene {
       return;
     }
 
-    // Ambient NPCs and obstacles (desks/furniture) are solid too.
+    // Ambient NPCs and obstacles (desks/furniture) are solid too. Doors are
+    // walkable — crossing them does nothing, Action is what triggers a room
+    // change (see tryUseDoorHere).
     const blockedByAmbient = this.ambientNpcs.some(n => n.col === targetCol && n.row === targetRow);
     if (blockedByAmbient) return;
 

@@ -50,8 +50,8 @@ class StartScene extends Phaser.Scene {
       this.registry.set('categoryBanks', buildCategoryBanks());
       this.registry.set('categoryQueueIndex', buildInitialQueueIndex());
       this.registry.set('categoryStats', buildInitialCategoryStats());
-      this.registry.set('dayIndex', 0);
-      this.registry.set('lastShownDayIndex', null);
+      this.registry.set('currentRoom', 0);
+      this.registry.set('pendingEntry', null);
       this.scene.start('Overworld');
     });
   }
