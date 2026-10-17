@@ -228,6 +228,82 @@ const SCENARIO_CATEGORIES = {
         explanation: ['Visual idêntico não garante autenticidade — páginas de phishing frequentemente clonam telas reais', 'O domínio real da Microsoft nunca inclui esses subdomínios estranhos somados ao nome dela', 'Inserir credenciais, mesmo que troque depois, já expõe a senha ao atacante']
       }
     ]
+  },
+
+  ia: {
+    name: 'Uso de IA Generativa',
+    icon: '🤖',
+    color: 0xe67e22,
+    scenarios: [
+      {
+        situation: 'Você quer usar uma ferramenta de IA generativa pública (tipo ChatGPT) pra resumir rapidamente um contrato de cliente antes de uma reunião, colando o texto completo do documento.',
+        choices: ['Usar apenas ferramentas de IA homologadas pela empresa — nunca colar documentos de cliente em ferramentas públicas', 'Colar o contrato inteiro, só quer um resumo rápido', 'Colar só removendo o nome do cliente, o resto tudo bem'],
+        correctIndex: 0,
+        explanation: ['Ferramentas públicas de IA podem usar o conteúdo colado para treinar modelos ou armazená-lo fora do controle da empresa', 'Remover só o nome não anonimiza o documento — outros dados sensíveis continuam lá', 'Ferramentas homologadas têm contrato de proteção de dados; as públicas gratuitas geralmente não']
+      },
+      {
+        situation: 'Você quer que uma IA generativa pública ajude a debugar um trecho de código que contém uma chave de API de produção escrita direto no arquivo.',
+        choices: ['Colar o código inteiro, incluindo a chave, pra IA entender o contexto completo', 'Remover ou mascarar a chave antes de colar, ou usar uma ferramenta de IA aprovada internamente', 'Colar e depois pedir pra IA "esquecer" o que viu'],
+        correctIndex: 1,
+        explanation: ['Uma chave de API colada em uma ferramenta externa deve ser tratada como potencialmente comprometida', 'Pedir pra IA "esquecer" não apaga o que já foi processado/registrado do lado do provedor', 'Mascarar a credencial antes de colar elimina o risco sem perder a ajuda de debug']
+      },
+      {
+        situation: 'Um colega sugere colar a planilha de salários da equipe numa IA generativa pública pra gerar automaticamente um resumo de custos pro gestor.',
+        choices: ['Fazer isso, economiza bastante tempo', 'Fazer, mas só compartilhar depois o resumo gerado, não a planilha original', 'Recusar — dado de RH/salarial é sensível e não deve ir pra uma ferramenta de IA externa'],
+        correctIndex: 2,
+        explanation: ['Dados salariais são informação pessoal sensível, sujeita a proteção extra', 'O dano já ocorre no momento em que a planilha é colada na ferramenta externa, independente do que é compartilhado depois', 'Esse tipo de resumo deve ser feito com ferramentas internas ou IA homologada com dados anonimizados']
+      },
+      {
+        situation: 'Uma IA generativa gera um trecho de código pra você usar no projeto da empresa, com uma licença de uso não totalmente clara.',
+        choices: ['Verificar a política interna sobre uso de código gerado por IA antes de incluir no produto', 'Usar direto, código gerado por IA não tem dono', 'Usar e só adicionar um comentário dizendo que foi gerado por IA'],
+        correctIndex: 0,
+        explanation: ['Código gerado por IA pode reproduzir trechos de fontes com licenças incompatíveis com uso comercial', 'Um comentário não resolve uma questão de propriedade intelectual ou licenciamento', 'A política interna existe justamente pra definir o processo seguro de revisão nesses casos']
+      },
+      {
+        situation: 'Você recebe de uma IA generativa uma resposta que parece precisa sobre um processo interno da empresa — mas você sabe que essa IA não tem acesso aos sistemas internos.',
+        choices: ['Confiar e repassar a informação, a IA parece bem informada', 'Perguntar de novo com outras palavras até a resposta mudar', 'Desconfiar — IA pode "alucinar" informações plausíveis mas inventadas; confirmar na fonte oficial'],
+        correctIndex: 2,
+        explanation: ['Modelos de IA generativa podem produzir respostas confiantes e bem escritas mesmo quando erradas ("alucinação")', 'Sem acesso aos sistemas internos reais, qualquer detalhe específico citado é, na melhor das hipóteses, uma suposição', 'Decisões ou comunicados baseados nessa informação devem ser confirmados na fonte oficial antes de agir']
+      }
+    ]
+  },
+
+  documents: {
+    name: 'Documentos Confidenciais',
+    icon: '📁',
+    color: 0x1abc9c,
+    scenarios: [
+      {
+        situation: 'Você precisa compartilhar uma planilha com dados financeiros internos com um fornecedor externo e vai gerar um link de compartilhamento.',
+        choices: ['Gerar um link do tipo "qualquer pessoa com o link pode acessar" e mandar por e-mail', 'Compartilhar apenas com o e-mail específico do fornecedor, com a permissão mínima necessária', 'Deixar a planilha pública no Drive, mas sem divulgar o link pra ninguém além do fornecedor'],
+        correctIndex: 1,
+        explanation: ['Links "qualquer pessoa com o link" podem ser repassados, indexados ou acessados por quem não deveria', 'Compartilhamento público "não divulgado" ainda é público — pode ser encontrado ou vazado por engano', 'Restringir ao e-mail específico com permissão mínima é o controle de acesso correto']
+      },
+      {
+        situation: 'Ao sair pra almoçar, você percebe que vai deixar documentos impressos com dados de clientes espalhados sobre a mesa, visíveis pra quem passar.',
+        choices: ['Guardar os documentos ou virá-los pra baixo antes de se ausentar (política de mesa limpa)', 'Deixar assim, é só um almoço rápido', 'Cobrir com outro papel por cima só pra disfarçar'],
+        correctIndex: 0,
+        explanation: ['Política de "mesa limpa" existe justamente pra cobrir esses momentos curtos de ausência', 'Qualquer tempo é suficiente pra alguém fotografar ou ler informação sensível exposta', 'Cobrir com outro papel não impede alguém de simplesmente mover o papel de cima']
+      },
+      {
+        situation: 'Alguém pede pra você classificar um documento como "Público" só pra facilitar o compartilhamento, mesmo ele contendo dados de clientes.',
+        choices: ['Classificar como Público mesmo, assim ninguém reclama de permissão', 'Classificar como Público só temporariamente, e depois lembrar de voltar', 'Manter a classificação correta (confidencial/interno), mesmo que isso complique o compartilhamento'],
+        correctIndex: 2,
+        explanation: ['A classificação de um documento deve refletir o conteúdo real, não a conveniência do momento', '"Temporariamente" é como informação confidencial acaba ficando pública por esquecimento', 'Compartilhamento mais trabalhoso é um custo aceitável comparado ao risco de exposição de dado de cliente']
+      },
+      {
+        situation: 'Você termina de usar a impressora compartilhada e percebe um relatório confidencial de outro projeto, de outra pessoa, esquecido na bandeja de saída.',
+        choices: ['Levar o documento até o dono ou destruí-lo com segurança (picotadora), nunca deixar lá nem jogar no lixo comum', 'Deixar lá, não é problema seu', 'Jogar no lixo comum do escritório'],
+        correctIndex: 0,
+        explanation: ['Documentos confidenciais esquecidos ficam visíveis pra qualquer pessoa que passe pela impressora', 'O lixo comum não é destruição segura — o documento continua legível e recuperável', 'Entregar ao dono ou picotar com segurança são os dois destinos corretos']
+      },
+      {
+        situation: 'Você quer fazer backup de arquivos de trabalho, incluindo documentos de clientes, e pensa em usar seu Google Drive ou Dropbox pessoal por ser mais prático.',
+        choices: ['Usar a nuvem pessoal, é só um backup e ninguém mais vai ver', 'Usar apenas ferramentas corporativas homologadas pra armazenar dado de cliente, nunca nuvem pessoal', 'Usar a nuvem pessoal só temporariamente, até o fim do projeto'],
+        correctIndex: 1,
+        explanation: ['Nuvem pessoal está fora do controle de segurança e auditoria da empresa', 'Dado de cliente em conta pessoal continua lá mesmo depois que você "lembra" de apagar', 'Ferramentas corporativas homologadas garantem criptografia, backup e controle de acesso adequados']
+      }
+    ]
   }
 };
 

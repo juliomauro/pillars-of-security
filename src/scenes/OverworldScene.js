@@ -16,8 +16,8 @@ const PLAYER_START = { col: 12, row: 9 };
 const ROOMS = [
   {
     name: 'Sala de TI',
-    categories: ['phishing', 'usb'],
-    npcPositions: [{ col: 6, row: 4 }, { col: 18, row: 4 }],
+    categories: ['phishing', 'usb', 'ia'],
+    npcPositions: [{ col: 5, row: 4 }, { col: 12, row: 4 }, { col: 19, row: 4 }],
     obstacles: [
       { col: 10, row: 12 }, { col: 11, row: 12 }, { col: 13, row: 12 }, { col: 14, row: 12 }
     ],
@@ -51,8 +51,8 @@ const ROOMS = [
   },
   {
     name: 'Contabilidade',
-    categories: ['passwords'],
-    npcPositions: [{ col: 12, row: 5 }],
+    categories: ['passwords', 'documents'],
+    npcPositions: [{ col: 8, row: 5 }, { col: 16, row: 5 }],
     obstacles: [
       { col: 10, row: 12 }, { col: 11, row: 12 }, { col: 13, row: 12 }, { col: 14, row: 12 }
     ],

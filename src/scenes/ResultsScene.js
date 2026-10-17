@@ -53,29 +53,30 @@ class ResultsScene extends Phaser.Scene {
     this.playAgainBtn = this.makeButton(560, 450, t(this, 'playAgain'), () => this.scene.start('Start'));
   }
 
-  // Two columns of 3, so six categories fit in a compact block.
+  // Grid fill, 4 columns wide, as many rows as needed — scales with however
+  // many categories exist instead of assuming exactly six.
   renderCategoryBreakdown(categoryStats) {
     const ids = Object.keys(SCENARIO_CATEGORIES);
-    const columns = [ids.slice(0, 3), ids.slice(3)];
-    const columnX = [230, 570];
+    const numCols = 4;
+    const columnX = [110, 290, 470, 650];
     const startY = 228;
-    const rowHeight = 34;
+    const rowHeight = 42; // extra room for two-line category names
 
-    columns.forEach((columnIds, col) => {
-      columnIds.forEach((categoryId, row) => {
-        const category = SCENARIO_CATEGORIES[categoryId];
-        const s = categoryStats[categoryId] || { correct: 0, attempted: 0 };
-        const pct = s.attempted > 0 ? Math.round((s.correct / s.attempted) * 100) : null;
-        const pctText = pct === null ? '—' : `${pct}%`;
-        const color = pct === null ? '#555566' : pct >= 70 ? '#4ecca3' : pct >= 40 ? '#f3a683' : '#e94560';
+    ids.forEach((categoryId, i) => {
+      const col = i % numCols;
+      const row = Math.floor(i / numCols);
+      const category = SCENARIO_CATEGORIES[categoryId];
+      const s = categoryStats[categoryId] || { correct: 0, attempted: 0 };
+      const pct = s.attempted > 0 ? Math.round((s.correct / s.attempted) * 100) : null;
+      const pctText = pct === null ? '—' : `${pct}%`;
+      const color = pct === null ? '#555566' : pct >= 70 ? '#4ecca3' : pct >= 40 ? '#f3a683' : '#e94560';
 
-        this.add.text(columnX[col], startY + row * rowHeight, `${category.icon} ${category.name}`, {
-          fontSize: '11px', color: '#ffffff'
-        }).setOrigin(0.5);
-        this.add.text(columnX[col], startY + row * rowHeight + 14, pctText, {
-          fontSize: '11px', color
-        }).setOrigin(0.5);
-      });
+      this.add.text(columnX[col], startY + row * rowHeight, `${category.icon} ${category.name}`, {
+        fontSize: '10px', color: '#ffffff', wordWrap: { width: 160 }, align: 'center'
+      }).setOrigin(0.5);
+      this.add.text(columnX[col], startY + row * rowHeight + 26, pctText, {
+        fontSize: '11px', color
+      }).setOrigin(0.5);
     });
   }
 
