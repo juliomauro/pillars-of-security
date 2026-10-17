@@ -249,19 +249,29 @@ function shuffle(array) {
   return copy;
 }
 
-// Builds the full ordered run for one playthrough: for each day, for each of
-// its categories, SCENARIOS_PER_CATEGORY scenarios sampled (no repeats
-// within the run) from that category's bank, in random order.
-function buildEncounterPlan() {
-  const plan = [];
-  DAYS.forEach(day => {
-    day.categories.forEach(categoryId => {
-      const category = SCENARIO_CATEGORIES[categoryId];
-      const picked = shuffle(category.scenarios).slice(0, SCENARIOS_PER_CATEGORY);
-      picked.forEach(scenario => {
-        plan.push({ dayId: day.id, dayName: day.name, categoryId, categoryName: category.name, scenario });
-      });
-    });
+// For each category, sample SCENARIOS_PER_CATEGORY scenarios (no repeats
+// within the run) in random order. Keyed by categoryId since each category
+// belongs to exactly one day.
+function buildCategoryBanks() {
+  const banks = {};
+  Object.keys(SCENARIO_CATEGORIES).forEach(categoryId => {
+    banks[categoryId] = shuffle(SCENARIO_CATEGORIES[categoryId].scenarios).slice(0, SCENARIOS_PER_CATEGORY);
   });
-  return plan;
+  return banks;
+}
+
+function buildInitialCategoryStats() {
+  const stats = {};
+  Object.keys(SCENARIO_CATEGORIES).forEach(categoryId => {
+    stats[categoryId] = { correct: 0, attempted: 0 };
+  });
+  return stats;
+}
+
+function buildInitialQueueIndex() {
+  const index = {};
+  Object.keys(SCENARIO_CATEGORIES).forEach(categoryId => {
+    index[categoryId] = 0;
+  });
+  return index;
 }

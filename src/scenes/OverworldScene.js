@@ -1,6 +1,10 @@
 // Grid size for the floor tiles (visual only — movement is free, not snapped).
 const TILE = 32;
 
+// Fixed map slots for a day's categories. DAYS currently has exactly 2
+// categories per day; a 3rd slot is here in case that changes later.
+const NPC_POSITIONS = [{ x: 220, y: 220 }, { x: 580, y: 220 }, { x: 400, y: 420 }];
+
 class OverworldScene extends Phaser.Scene {
   constructor() {
     super('Overworld');
@@ -38,15 +42,16 @@ class OverworldScene extends Phaser.Scene {
       fontSize: '14px', color: '#ffffff'
     });
 
-    const entry = this.registry.get('encounterPlan')[this.registry.get('encounterIndex')];
-    const lastShownDay = this.registry.get('lastShownDayId');
-
     this.encounterLocked = false;
 
-    if (entry.dayId !== lastShownDay) {
-      this.showDayBanner(entry, () => this.spawnCategoryNpc(entry));
+    const dayIndex = this.registry.get('dayIndex');
+    const day = DAYS[dayIndex];
+    const lastShownDayIndex = this.registry.get('lastShownDayIndex');
+
+    if (dayIndex !== lastShownDayIndex) {
+      this.showDayBanner(dayIndex, day, () => this.spawnDayNpcs(day));
     } else {
-      this.spawnCategoryNpc(entry);
+      this.spawnDayNpcs(day);
     }
   }
 
@@ -58,18 +63,19 @@ class OverworldScene extends Phaser.Scene {
     }
   }
 
-  showDayBanner(entry, onDismiss) {
+  showDayBanner(dayIndex, day, onDismiss) {
     this.physics.pause();
     const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.85).setDepth(10);
-    const title = this.add.text(400, 260, entry.dayName, { fontSize: '26px', color: '#4ecca3' }).setOrigin(0.5).setDepth(11);
-    const sub = this.add.text(400, 310, entry.categoryName, { fontSize: '14px', color: '#ffffff' }).setOrigin(0.5).setDepth(11);
+    const title = this.add.text(400, 250, day.name, { fontSize: '26px', color: '#4ecca3' }).setOrigin(0.5).setDepth(11);
+    const categoryNames = day.categories.map(id => SCENARIO_CATEGORIES[id].name).join(' & ');
+    const sub = this.add.text(400, 300, categoryNames, { fontSize: '14px', color: '#ffffff' }).setOrigin(0.5).setDepth(11);
 
-    const btn = this.add.text(400, 380, t(this, 'start'), {
+    const btn = this.add.text(400, 370, t(this, 'start'), {
       fontSize: '14px', color: '#ffffff', backgroundColor: '#0f3460', padding: { x: 14, y: 8 }
     }).setOrigin(0.5).setDepth(11).setInteractive({ useHandCursor: true });
 
     btn.on('pointerdown', () => {
-      this.registry.set('lastShownDayId', entry.dayId);
+      this.registry.set('lastShownDayIndex', dayIndex);
       overlay.destroy();
       title.destroy();
       sub.destroy();
@@ -79,24 +85,40 @@ class OverworldScene extends Phaser.Scene {
     });
   }
 
-  spawnCategoryNpc(entry) {
-    const category = SCENARIO_CATEGORIES[entry.categoryId];
-    const textureKey = 'npc-' + entry.categoryId;
-    if (!this.textures.exists(textureKey)) {
-      this.generateTexture(textureKey, category.color, 24, 24);
-    }
+  // Spawns one NPC per category still pending today, so the player picks
+  // which one to tackle first. Finished categories show a checkmark instead.
+  spawnDayNpcs(day) {
+    const queueIndex = this.registry.get('categoryQueueIndex');
 
-    this.npc = this.physics.add.staticSprite(200, 200, textureKey);
-    this.add.text(200, 170, `${category.icon} ${category.name}`, { fontSize: '12px', color: '#e94560' }).setOrigin(0.5);
-    this.physics.add.overlap(this.player, this.npc, this.startEncounter, null, this);
+    day.categories.forEach((categoryId, i) => {
+      const pos = NPC_POSITIONS[i] || { x: 400, y: 450 };
+      const category = SCENARIO_CATEGORIES[categoryId];
+      const done = queueIndex[categoryId] >= SCENARIOS_PER_CATEGORY;
+
+      if (done) {
+        this.add.text(pos.x, pos.y, `✅ ${category.name}`, { fontSize: '12px', color: '#4ecca3' }).setOrigin(0.5);
+        return;
+      }
+
+      const textureKey = 'npc-' + categoryId;
+      if (!this.textures.exists(textureKey)) {
+        this.generateTexture(textureKey, category.color, 24, 24);
+      }
+
+      const npc = this.physics.add.staticSprite(pos.x, pos.y, textureKey);
+      this.add.text(pos.x, pos.y - 30, `${category.icon} ${category.name}`, {
+        fontSize: '12px', color: '#e94560'
+      }).setOrigin(0.5);
+      this.physics.add.overlap(this.player, npc, () => this.startEncounter(categoryId), null, this);
+    });
 
     this.add.text(16, 560, t(this, 'overworldHint'), { fontSize: '12px', color: '#aaaaaa' });
   }
 
-  startEncounter() {
+  startEncounter(categoryId) {
     if (this.encounterLocked) return;
     this.encounterLocked = true;
-    this.scene.start('Encounter');
+    this.scene.start('Encounter', { categoryId });
   }
 
   update() {

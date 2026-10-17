@@ -3,7 +3,8 @@ class EncounterScene extends Phaser.Scene {
     super('Encounter');
   }
 
-  create() {
+  create({ categoryId }) {
+    this.categoryId = categoryId;
     this.renderCurrent();
   }
 
@@ -13,21 +14,24 @@ class EncounterScene extends Phaser.Scene {
     this.children.removeAll(true);
     this.cameras.main.setBackgroundColor('#0f0f1e');
 
-    const plan = this.registry.get('encounterPlan');
-    const index = this.registry.get('encounterIndex');
-    this.entry = plan[index];
-    const data = this.entry.scenario;
+    const bank = this.registry.get('categoryBanks')[this.categoryId];
+    const queueIndex = this.registry.get('categoryQueueIndex')[this.categoryId];
+    this.scenario = bank[queueIndex];
+    const category = SCENARIO_CATEGORIES[this.categoryId];
 
-    this.add.text(400, 30, `${SCENARIO_CATEGORIES[this.entry.categoryId].icon} ${this.entry.categoryName}`, {
+    this.add.text(400, 30, `${category.icon} ${category.name}`, {
       fontSize: '18px', color: '#e94560'
+    }).setOrigin(0.5);
+    this.add.text(400, 52, `${queueIndex + 1}/${SCENARIOS_PER_CATEGORY}`, {
+      fontSize: '12px', color: '#aaaaaa'
     }).setOrigin(0.5);
 
     this.add.rectangle(400, 220, 640, 300, 0x1a1a2e).setStrokeStyle(2, 0x4ecca3);
-    this.add.text(100, 90, data.situation, {
+    this.add.text(100, 90, this.scenario.situation, {
       fontSize: '14px', color: '#ffffff', wordWrap: { width: 600 }, lineSpacing: 6
     });
 
-    this.choiceButtons = data.choices.map((choice, i) =>
+    this.choiceButtons = this.scenario.choices.map((choice, i) =>
       this.makeButton(400, 400 + i * 55, choice, () => this.resolve(i))
     );
   }
@@ -47,8 +51,12 @@ class EncounterScene extends Phaser.Scene {
   resolve(choiceIndex) {
     this.choiceButtons.forEach(b => b.disableInteractive());
 
-    const data = this.entry.scenario;
-    const success = choiceIndex === data.correctIndex;
+    const success = choiceIndex === this.scenario.correctIndex;
+
+    const stats = this.registry.get('categoryStats');
+    stats[this.categoryId].attempted += 1;
+    if (success) stats[this.categoryId].correct += 1;
+    this.registry.set('categoryStats', stats);
 
     this.registry.set('attemptedCount', (this.registry.get('attemptedCount') || 0) + 1);
     if (success) {
@@ -58,6 +66,10 @@ class EncounterScene extends Phaser.Scene {
     } else {
       this.registry.set('halfHearts', Math.max(0, (this.registry.get('halfHearts') ?? 8) - 2));
     }
+
+    const queueIndex = this.registry.get('categoryQueueIndex');
+    queueIndex[this.categoryId] += 1;
+    this.registry.set('categoryQueueIndex', queueIndex);
 
     this.showResult(success);
   }
@@ -69,7 +81,7 @@ class EncounterScene extends Phaser.Scene {
       fontSize: '18px', color: success ? '#4ecca3' : '#e94560'
     }).setOrigin(0.5);
 
-    const text = this.entry.scenario.explanation.map(f => `• ${f}`).join('\n\n');
+    const text = this.scenario.explanation.map(f => `• ${f}`).join('\n\n');
     this.add.text(400, 220, text, {
       fontSize: '12px', color: '#ffffff', wordWrap: { width: 640 }, align: 'left', lineSpacing: 6
     }).setOrigin(0.5, 0);
@@ -83,19 +95,27 @@ class EncounterScene extends Phaser.Scene {
       return;
     }
 
-    const nextIndex = this.registry.get('encounterIndex') + 1;
-    this.registry.set('encounterIndex', nextIndex);
-    const plan = this.registry.get('encounterPlan');
-
-    if (nextIndex >= plan.length) {
-      this.scene.start('Results', { reason: 'cleared' });
+    const queueIndex = this.registry.get('categoryQueueIndex');
+    if (queueIndex[this.categoryId] < SCENARIOS_PER_CATEGORY) {
+      this.renderCurrent();
       return;
     }
 
-    const sameCategory = plan[nextIndex].categoryId === this.entry.categoryId;
-    if (sameCategory) {
-      this.renderCurrent();
+    // This category is done — see if the rest of today's categories are too.
+    const dayIndex = this.registry.get('dayIndex');
+    const day = DAYS[dayIndex];
+    const dayDone = day.categories.every(id => queueIndex[id] >= SCENARIOS_PER_CATEGORY);
+
+    if (!dayDone) {
+      this.scene.start('Overworld');
+      return;
+    }
+
+    const nextDayIndex = dayIndex + 1;
+    if (nextDayIndex >= DAYS.length) {
+      this.scene.start('Results', { reason: 'cleared' });
     } else {
+      this.registry.set('dayIndex', nextDayIndex);
       this.scene.start('Overworld');
     }
   }

@@ -24,27 +24,57 @@ class ResultsScene extends Phaser.Scene {
     const halfHearts = this.registry.get('halfHearts') || 0;
     const correctCount = this.registry.get('correctCount') || 0;
     const attemptedCount = this.registry.get('attemptedCount') || 0;
+    const categoryStats = this.registry.get('categoryStats') || {};
     const rank = computeRank(correctCount, attemptedCount);
 
     const title = reason === 'gameover' ? t(this, 'gameOverTitle') : t(this, 'clearedTitle');
     const sub = reason === 'gameover' ? t(this, 'gameOverSub') : t(this, 'clearedSub');
 
-    this.add.text(400, 50, title, { fontSize: '24px', color: '#e94560' }).setOrigin(0.5);
-    this.add.text(400, 85, sub, { fontSize: '13px', color: '#aaaaaa' }).setOrigin(0.5);
+    this.add.text(400, 30, title, { fontSize: '22px', color: '#e94560' }).setOrigin(0.5);
+    this.add.text(400, 58, sub, { fontSize: '12px', color: '#aaaaaa' }).setOrigin(0.5);
 
-    this.add.text(400, 150, `${t(this, 'playerLabel')}: ${name}`, { fontSize: '16px', color: '#ffffff' }).setOrigin(0.5);
-    this.add.text(400, 180, `${t(this, 'scoreLabel')}: ${score}`, { fontSize: '16px', color: '#ffffff' }).setOrigin(0.5);
+    this.add.text(400, 95, `${t(this, 'playerLabel')}: ${name}`, { fontSize: '15px', color: '#ffffff' }).setOrigin(0.5);
+    this.add.text(400, 118, `${t(this, 'scoreLabel')}: ${score}`, { fontSize: '15px', color: '#ffffff' }).setOrigin(0.5);
 
-    renderHearts(this, 338, 212, halfHearts);
-    this.add.text(400, 246, `${t(this, 'livesLabel')}: ${halfHearts / 2}/4`, { fontSize: '12px', color: '#aaaaaa' }).setOrigin(0.5);
+    renderHearts(this, 338, 148, halfHearts);
+    this.add.text(400, 180, `${t(this, 'livesLabel')}: ${halfHearts / 2}/4`, { fontSize: '11px', color: '#aaaaaa' }).setOrigin(0.5);
+
+    this.add.text(400, 205, t(this, 'categoryBreakdown'), { fontSize: '13px', color: '#4ecca3' }).setOrigin(0.5);
+    this.renderCategoryBreakdown(categoryStats);
 
     this.add.text(400, 330, rank, {
-      fontSize: '96px', color: RANK_COLORS[rank] || '#ffffff', fontStyle: 'bold'
+      fontSize: '72px', color: RANK_COLORS[rank] || '#ffffff', fontStyle: 'bold'
     }).setOrigin(0.5);
-    this.add.text(400, 400, t(this, 'rankLabel'), { fontSize: '14px', color: '#aaaaaa' }).setOrigin(0.5);
+    this.add.text(400, 385, t(this, 'rankLabel'), { fontSize: '13px', color: '#aaaaaa' }).setOrigin(0.5);
 
-    this.downloadBtn = this.makeButton(290, 500, t(this, 'downloadImage'), () => this.downloadImage());
-    this.playAgainBtn = this.makeButton(560, 500, t(this, 'playAgain'), () => this.scene.start('Start'));
+    this.downloadBtn = this.makeButton(290, 450, t(this, 'downloadImage'), () => this.downloadImage());
+    this.playAgainBtn = this.makeButton(560, 450, t(this, 'playAgain'), () => this.scene.start('Start'));
+  }
+
+  // Two columns of 3, so six categories fit in a compact block.
+  renderCategoryBreakdown(categoryStats) {
+    const ids = Object.keys(SCENARIO_CATEGORIES);
+    const columns = [ids.slice(0, 3), ids.slice(3)];
+    const columnX = [230, 570];
+    const startY = 228;
+    const rowHeight = 34;
+
+    columns.forEach((columnIds, col) => {
+      columnIds.forEach((categoryId, row) => {
+        const category = SCENARIO_CATEGORIES[categoryId];
+        const s = categoryStats[categoryId] || { correct: 0, attempted: 0 };
+        const pct = s.attempted > 0 ? Math.round((s.correct / s.attempted) * 100) : null;
+        const pctText = pct === null ? '—' : `${pct}%`;
+        const color = pct === null ? '#555566' : pct >= 70 ? '#4ecca3' : pct >= 40 ? '#f3a683' : '#e94560';
+
+        this.add.text(columnX[col], startY + row * rowHeight, `${category.icon} ${category.name}`, {
+          fontSize: '11px', color: '#ffffff'
+        }).setOrigin(0.5);
+        this.add.text(columnX[col], startY + row * rowHeight + 14, pctText, {
+          fontSize: '11px', color
+        }).setOrigin(0.5);
+      });
+    });
   }
 
   makeButton(x, y, label, onClick) {

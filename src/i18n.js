@@ -23,6 +23,7 @@ const I18N = {
     playerLabel: 'Player',
     rankLabel: 'Rank',
     livesLabel: 'Lives left',
+    categoryBreakdown: 'Performance by category',
     downloadImage: '⬇️ Download image',
     playAgain: '🔁 Play again'
   },
@@ -50,6 +51,7 @@ const I18N = {
     playerLabel: 'Jogador',
     rankLabel: 'Rank',
     livesLabel: 'Vidas restantes',
+    categoryBreakdown: 'Desempenho por categoria',
     downloadImage: '⬇️ Baixar imagem',
     playAgain: '🔁 Jogar de novo'
   },
@@ -77,6 +79,7 @@ const I18N = {
     playerLabel: 'Spelare',
     rankLabel: 'Rang',
     livesLabel: 'Liv kvar',
+    categoryBreakdown: 'Resultat per kategori',
     downloadImage: '⬇️ Ladda ner bild',
     playAgain: '🔁 Spela igen'
   }
