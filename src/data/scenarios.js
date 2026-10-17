@@ -140,7 +140,7 @@ const SCENARIO_CATEGORIES = {
         explanation: ["Cabos maliciosos (\"juice jacking\") podem transferir dados ou instalar malware via porta USB", 'Não dá pra saber visualmente se um cabo foi alterado', 'Levar seu próprio carregador/cabo é sempre a opção mais segura']
       },
       {
-        situation: 'Ao conectar um dispositivo USB, seu computador avisa que um novo teclado ou driver foi instalado de repente.',
+        situation: 'Você encontra um pendrive comum em cima da sua mesa e conecta pra tentar identificar o dono pelo conteúdo. Mas o Windows mostra "Instalando dispositivo: teclado USB" — nunca apareceu isso antes ao plugar um pendrive.',
         choices: ['Ignorar o aviso, provavelmente é só uma atualização', 'Desconectar o dispositivo imediatamente e avisar o time de segurança', 'Reiniciar o computador e seguir normalmente'],
         correctIndex: 1,
         explanation: ['Dispositivos USB que se disfarçam de teclado ("USB Rubber Ducky") podem injetar comandos maliciosos automaticamente', 'Esse comportamento não é uma atualização normal de sistema', 'Desconectar e reportar rápido limita o dano potencial']
