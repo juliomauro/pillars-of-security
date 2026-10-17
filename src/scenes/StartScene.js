@@ -45,9 +45,11 @@ class StartScene extends Phaser.Scene {
     this.makeButton(400, 400, t(this, 'start'), () => {
       this.registry.set('halfHearts', 8);
       this.registry.set('score', 0);
-      this.registry.set('clearedNpcIds', []);
       this.registry.set('attemptedCount', 0);
       this.registry.set('correctCount', 0);
+      this.registry.set('encounterPlan', buildEncounterPlan());
+      this.registry.set('encounterIndex', 0);
+      this.registry.set('lastShownDayId', null);
       this.scene.start('Overworld');
     });
   }

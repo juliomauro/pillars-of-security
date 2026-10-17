@@ -1,0 +1,87 @@
+### 1. Phishing
+
+1. Você recebe um e-mail com logotipo do departamento financeiro solicitando a revalidação imediata do cadastro bancário para não atrasar o salário, com um link que expira em 1 hora. Como agir?
+2. Um e-mail da ferramenta oficial de chamados da empresa chega informando que sua caixa de entrada está com 98% de armazenamento e pede clique em um botão para "limpar anexos". O que você faz?
+3. Uma mensagem supostamente de uma transportadora conhecida informa que uma encomenda para seu departamento não pôde ser entregue e exige o download de um anexo `.zip` com o comprovante. Qual é a conduta correta?
+4. Você recebe uma notificação parecida com a do Google Workspace/Microsoft 365 avisando que houve tentativa de acesso suspeita e pedindo login imediato para redefinir a credencial. Qual o primeiro passo?
+5. Um e-mail com endereço de remetente quase idêntico ao de um fornecedor parceiro (ex.: trocando uma letra minúscula por número) solicita a atualização dos dados de cobrança. Como proceder?
+6. Ao receber um e-mail de um cliente com um PDF anexado que pede para "habilitar macros" ou "clicar em link externo para visualizar o conteúdo protegido", o que deve ser feito?
+7. Um e-mail promocional oferece um brinde corporativo ou vale-compras aos primeiros 50 funcionários que preencherem um formulário com credenciais de rede. Qual a atitude adequada?
+8. Você recebe um comunicado formal sobre demissões ou reestruturação interna contendo um link para uma planilha em nuvem externa. Como validar a legitimidade da mensagem?
+9. Um fornecedor envia uma fatura legítima, mas o e-mail vem acompanhado de um arquivo executável (`.exe` ou `.scr`) disfarçado de documento fiscal. Qual o procedimento seguro?
+10. O que deve ser feito imediatamente após você perceber que clicou em um link suspeito e digitou suas credenciais em uma página falsa?
+
+---
+
+### 2. Engenharia Social
+
+1. Uma pessoa liga para o seu ramal alegando ser do suporte de TI e diz que precisa da sua senha temporariamente para aplicar um patch crítico de segurança antes do final do expediente. O que responder?
+2. Um suposto auditor externo entra em contato por WhatsApp pedindo o organograma detalhado e a lista de ramais da diretoria para agilizar uma auditoria em andamento. Como tratar o pedido?
+3. Alguém aborda você na área de café corporativa puxando conversa sobre projetos confidenciais e fazendo perguntas específicas sobre clientes estratégicos. Qual a melhor postura?
+4. Você recebe uma mensagem urgente no celular afirmando ser do CEO da empresa, pedindo sigilo total e a compra emergencial de cartões-presente ou transferência de valores. Como reagir?
+5. Um usuário liga se passando por um colega recém-contratado desesperado, alegando que esqueceu as credenciais de acesso e pedindo que você consulte e passe relatórios confidenciais por e-mail pessoal. O que fazer?
+6. Alguém entra em contato dizendo que encontrou seu crachá/documento e pede confirmação de CPF, data de nascimento e matrícula da empresa para "garantir que é você mesmo". Qual a conduta correta?
+7. Um prestador de serviços uniformizado aparece na sua sala dizendo que veio fazer a manutenção preventiva dos notebooks e pede que todos deixem as máquinas destravadas. O que deve ser exigido?
+8. Durante um evento externo do setor, uma pessoa simpática demonstra interesse excessivo em detalhes sobre a infraestrutura em nuvem e os fornecedores de tecnologia da sua empresa. Como filtrar as respostas?
+9. Você recebe uma ligação de alguém afirmando ser da operadora de telefonia pedindo para ditar um código de SMS de 6 dígitos recebido no seu celular funcional para "validar a linha". O que fazer?
+10. Como você deve agir se um terceiro insistir em obter informações internas sob a alegação de que "o diretor já autorizou verbalmente", mas sem nenhuma comprovação formal?
+
+---
+
+### 3. Tailgating (Acesso Físico Não Autorizado)
+
+1. Ao passar seu crachá na catraca de entrada, uma pessoa sem identificação pede para você segurar a porta, alegando que esqueceu o crachá no carro. Qual a conduta adequada?
+2. Um entregador de comida chega à porta de acesso restrito dos escritórios com as mãos cheias e pede para você liberar a passagem dele. O que fazer?
+3. Uma pessoa bem-vestida e com pastas de documentos aproveita o momento em que a porta automática se abre atrás de você para entrar junto sem encostar o crachá. Como reagir?
+4. Você encontra uma pessoa desconhecida e sem crachá de visitante caminhando sozinha em uma área restrita da empresa. Qual é a melhor abordagem?
+5. Durante o intervalo para fumar ou tomar café na área externa, um grupo de colaboradores retorna e apenas a primeira pessoa passa o crachá, mantendo a porta aberta para todos os outros. Qual o risco dessa prática?
+6. Um técnico de manutenção afirma estar atrasado para um reparo emergencial no datacenter e pede para você liberar a porta exclusiva com seu crachá. Como proceder?
+7. Na saída da empresa ao final do dia, alguém tenta entrar pelo sentido contrário da catraca/porta enquanto você passa. O que deve ser feito?
+8. Um visitante com crachá de identificação solicita entrar em uma área confidencial sem a presença do funcionário anfitrião responsável por ele. Como agir?
+9. Se um colaborador conhecido da empresa estiver temporariamente sem crachá funcional, você deve passar o seu por ele ou orientá-lo a emitir um acesso avulso na recepção?
+10. O que fazer se uma pessoa ficar agressiva ou constrangida ao ser solicitada a apresentar a identificação ou procurar a recepção para entrar no prédio?
+
+---
+
+### 4. USB / Dispositivos Desconhecidos
+
+1. Você encontra um pendrive caído no estacionamento da empresa com uma etiqueta escrita "Bônus e Salários da Diretoria". Qual a atitude correta?
+2. Um participante de uma reunião presencial pede para plugar o pendrive dele diretamente no seu notebook corporativo para apresentar slides. Como agir?
+3. Uma empresa desconhecida envia pelos Correios um brinde de final de ano contendo um pendrive promocional personalizado com catálogo de produtos. O dispositivo pode ser conectado?
+4. Você encontra um cabo de carregador de celular abandonado na sala de reuniões e seu aparelho corporativo está quase sem bateria. É seguro usá-lo?
+5. Um colega de trabalho empresta um HD externo pessoal para transferir arquivos de vídeo pesados da empresa para o seu notebook. Quais os riscos envolvidos?
+6. Ao conectar acidentalmente um dispositivo USB, seu computador exibe uma mensagem dizendo que um novo teclado ou driver foi instalado subitamente. O que isso pode significar e como agir?
+7. Um cliente insiste em entregar arquivos de contrato exclusivamente em uma mídia USB física em vez de enviar por e-mail ou nuvem homologada. Qual o procedimento seguro para ler os arquivos?
+8. Qual é a política correta da organização sobre carregar celulares pessoais conectando o cabo USB nas portas das estações de trabalho corporativas?
+9. Se você encontrar múltiplos pendrives espalhados pela recepção ou mesas de café da empresa, para onde deve encaminhá-los imediatamente?
+10. O uso de pendrives pessoais para fazer backup de dados de trabalho e levar para casa é considerado seguro? Por quê?
+
+---
+
+### 5. Reúso de Senhas e Gestão de Credenciais
+
+1. Por que utilizar a mesma senha do seu e-mail pessoal nas ferramentas e logins corporativos representa um risco crítico para a organização?
+2. Caso um site de compras ou rede social que você utiliza sofra um vazamento de dados, qual deve ser sua atitude em relação às contas da empresa se você usava senhas semelhantes?
+3. Qual é a prática correta para armazenar senhas complexas do dia a dia corporativo em vez de anotá-las em blocos de anotações, papéis colados no monitor ou planilhas locais?
+4. Um colega de equipe pede sua senha de acesso a um sistema comum porque a dele foi bloqueada e ele precisa finalizar um relatório urgente. Como responder?
+5. Qual a diferença em termos de segurança entre uma senha curta com caracteres aleatórios (ex.: `K#9!xL`) e uma frase-senha longa (passphrase, ex.: `cafe-com-leite-na-quinta-feira`)?
+6. Por que alterar a senha apenas adicionando um número ou caractere ao final (ex.: `Empresa2025!` para `Empresa2026!`) não é uma prática recomendada?
+7. Como funciona o ataque de preenchimento de credenciais (*credential stuffing*) e por que o reúso de senhas o torna tão eficaz?
+8. Ao sair da sua mesa por apenas 3 minutos para pegar água ou ir ao banheiro, qual é a conduta obrigatória em relação ao computador?
+9. Um sistema interno ainda não possui autenticação multifator (MFA/2FA) ativada. Quais cuidados extras devem ser redobrados em relação à senha dessa ferramenta?
+10. Qual a conduta correta quando uma ferramenta corporativa exige que você configure uma senha temporária após a redefinição de acesso?
+
+---
+
+### 6. Links Suspeitos no Slack / Microsoft Teams / E-mail
+
+1. Um colega do seu departamento posta em um canal geral do Teams um link encurtado (`bit.ly/...`) dizendo: "Vejam as novas fotos da confraternização de ontem". Qual o primeiro cuidado antes de clicar?
+2. Você recebe uma mensagem direta no Slack de um bot ou aplicativo integrado afirmando que seu token de sessão expirou e pedindo login com credenciais de rede. Como verificar a autenticidade?
+3. Em um chat privado no Teams, um perfil com o nome e foto de um diretor pede para você clicar em um link externo para assinar um documento urgente via plataforma desconhecida. Como validar?
+4. Uma mensagem em canal público do Slack avisa sobre uma atualização obrigatória de software corporativo e disponibiliza um link direto para baixar um arquivo instalador. Como proceder?
+5. Ao passar o cursor do mouse (sem clicar) sobre um hiperlink em uma mensagem de e-mail ou chat, o endereço de destino revelado é diferente do texto visível. O que isso indica?
+6. Você recebe uma mensagem no chat corporativo dizendo "Parabéns, você foi selecionado para uma pesquisa interna remunerada, responda aqui: [link]". O que fazer?
+7. Um convite de calendário no Teams/Outlook chega de um remetente desconhecido contendo um link para reunião com um anexo executável no corpo do convite. Qual a conduta segura?
+8. Uma conta comprometida de um colaborador legítimo começa a enviar links com arquivos maliciosos em massa nos canais internos. O que você deve fazer ao notar esse comportamento?
+9. Um link recebido por e-mail direciona para uma tela de login idêntica à da Microsoft, mas a barra de endereços do navegador exibe um domínio estranho (ex.: `login.microsoft.security-update.com`). O que isso significa?
+10. Se você clicar por engano em um link malicioso no Slack/Teams, mas a página não carregar ou parecer vazia, quais providências você deve tomar imediatamente?
