@@ -25,41 +25,41 @@ class OverworldScene extends Phaser.Scene {
     g.destroy();
   }
 
-  create(data = {}) {
+  create() {
     this.drawFloor();
 
     this.player = this.physics.add.sprite(400, 300, 'player');
     this.player.setCollideWorldBounds(true);
 
-    // Respawn the NPC unless the player just beat this exact encounter
-    // (EncounterScene passes back which npcId was resolved).
-    if (data.clearedNpc !== 'phishing-email-1') {
-      this.npc = this.physics.add.staticSprite(200, 200, 'npc-phish');
-      this.npcLabel = this.add.text(200, 170, 'Caixa de entrada', {
-        fontSize: '12px', color: '#e94560'
-      }).setOrigin(0.5);
-      this.physics.add.overlap(this.player, this.npc, this.startEncounter, null, this);
-    } else {
-      this.add.text(200, 170, 'Badge conquistado', {
-        fontSize: '12px', color: '#4ecca3'
-      }).setOrigin(0.5);
+    const cleared = this.registry.get('clearedNpcIds') || [];
+    const remaining = getEncounterIds().filter(id => !cleared.includes(id));
+
+    if (remaining.length === 0) {
+      this.scene.start('Results', { reason: 'cleared' });
+      return;
     }
+
+    const npcId = remaining[0];
+    this.npc = this.physics.add.staticSprite(200, 200, 'npc-phish');
+    this.npc.npcId = npcId;
+    this.add.text(200, 170, t(this, 'inboxLabel'), { fontSize: '12px', color: '#e94560' }).setOrigin(0.5);
+    this.physics.add.overlap(this.player, this.npc, this.startEncounter, null, this);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = this.input.keyboard.addKeys('W,A,S,D');
 
-    this.add.text(16, 16, 'Pillars of Security — esqueleto v0', {
+    this.add.text(16, 16, 'Pillars of Security', { fontSize: '14px', color: '#ffffff' });
+    this.add.text(16, 560, t(this, 'overworldHint'), { fontSize: '12px', color: '#aaaaaa' });
+
+    renderHearts(this, 596, 16, this.registry.get('halfHearts') ?? 8);
+    this.add.text(596, 46, `${t(this, 'scoreLabel')}: ${this.registry.get('score') || 0}`, {
       fontSize: '14px', color: '#ffffff'
-    });
-    this.add.text(16, 560, 'Setas/WASD para mover. Encoste na caixa de entrada vermelha.', {
-      fontSize: '12px', color: '#aaaaaa'
     });
 
     this.encounterLocked = false;
   }
 
   drawFloor() {
-    const g = this.add.graphics();
     for (let x = 0; x < 800; x += TILE) {
       for (let y = 0; y < 600; y += TILE) {
         this.add.image(x + TILE / 2, y + TILE / 2, 'floor');
@@ -70,7 +70,7 @@ class OverworldScene extends Phaser.Scene {
   startEncounter(player, npc) {
     if (this.encounterLocked) return;
     this.encounterLocked = true;
-    this.scene.start('Encounter', { npcId: 'phishing-email-1' });
+    this.scene.start('Encounter', { npcId: npc.npcId });
   }
 
   update() {

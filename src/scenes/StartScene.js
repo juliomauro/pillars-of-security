@@ -1,0 +1,66 @@
+class StartScene extends Phaser.Scene {
+  constructor() {
+    super('Start');
+  }
+
+  create() {
+    this.registry.set('language', 'pt');
+    this.registry.set('playerName', 'Jogador');
+    this.renderLanguageStep();
+  }
+
+  renderLanguageStep() {
+    this.children.removeAll(true);
+    this.add.text(400, 110, 'Pillars of Security', { fontSize: '28px', color: '#4ecca3' }).setOrigin(0.5);
+    this.add.text(400, 160, 'Choose your language / Escolha seu idioma / Välj ditt språk', {
+      fontSize: '13px', color: '#ffffff'
+    }).setOrigin(0.5);
+
+    const langs = [['en', 'English'], ['pt', 'Português'], ['sv', 'Svenska']];
+    langs.forEach(([code, label], i) => {
+      this.makeButton(400, 250 + i * 60, label, () => {
+        this.registry.set('language', code);
+        this.renderNameStep();
+      });
+    });
+  }
+
+  renderNameStep() {
+    this.children.removeAll(true);
+    this.add.text(400, 130, t(this, 'namePromptTitle'), { fontSize: '22px', color: '#4ecca3' }).setOrigin(0.5);
+
+    this.makeButton(400, 220, t(this, 'enterName'), () => {
+      const name = window.prompt(t(this, 'namePromptTitle'));
+      if (name && name.trim()) {
+        this.registry.set('playerName', name.trim().slice(0, 20));
+        this.nameLabel.setText(`${t(this, 'playerLabel')}: ${this.registry.get('playerName')}`);
+      }
+    });
+
+    this.nameLabel = this.add.text(
+      400, 290, `${t(this, 'playerLabel')}: ${this.registry.get('playerName')}`,
+      { fontSize: '14px', color: '#ffffff' }
+    ).setOrigin(0.5);
+
+    this.makeButton(400, 400, t(this, 'start'), () => {
+      this.registry.set('halfHearts', 8);
+      this.registry.set('score', 0);
+      this.registry.set('clearedNpcIds', []);
+      this.registry.set('attemptedCount', 0);
+      this.registry.set('correctCount', 0);
+      this.scene.start('Overworld');
+    });
+  }
+
+  makeButton(x, y, label, onClick) {
+    const btn = this.add.text(x, y, label, {
+      fontSize: '16px', color: '#ffffff', backgroundColor: '#0f3460',
+      padding: { x: 16, y: 10 }
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    btn.on('pointerover', () => btn.setStyle({ backgroundColor: '#16213e' }));
+    btn.on('pointerout', () => btn.setStyle({ backgroundColor: '#0f3460' }));
+    btn.on('pointerdown', onClick);
+    return btn;
+  }
+}

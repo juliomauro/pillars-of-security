@@ -8,7 +8,7 @@ const config = {
     default: 'arcade',
     arcade: { gravity: { y: 0 }, debug: false }
   },
-  scene: [OverworldScene, EncounterScene]
+  scene: [StartScene, OverworldScene, EncounterScene, ResultsScene]
 };
 
 new Phaser.Game(config);
