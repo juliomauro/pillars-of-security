@@ -1,87 +1,96 @@
 +-----------------------------------------------------------------------------------+
 |                              [ TELA DE ABERTURA ]                                 |
-|  - Logotipo da Empresa                                                            |
-|  - Nome do Jogo                                                                   |
-|  - Opções: [ Início ] | [ Ajuda ]                                                 |
-+-------------------------+------------------------------------+--------------------+
-                          |                                    |
-                    (Seleciona Ajuda)                    (Seleciona Início)
-                          |                                    |
-                          v                                    v
-     +----------------------------------------+     +-------------------------------+
-     |            [ TELA DE AJUDA ]           |     |     [ ENTRADA DO JOGADOR ]    |
-     | - Controles (W/A/S/D + Espaço/Z)       |     | - Input: Nome do Jogador      |
-     | - Regras: Vidas, Salas e Ranking       |     | - Botão: [ Começar Jogo ]     |
-     | - [ Voltar ao Menu ] ----------------->+     +---------------+---------------+
-     +----------------------------------------+                     |
-                                                                    v
-                                                    +-------------------------------+
-                                                    |      [ SETUP DA PARTIDA ]     |
-                                                    | - Vidas: 3.0 Corações (Max: 3)|
-                                                    | - Placar: Acertos / Erros     |
-                                                    | - cafe_consumido = 0 (Max: 2) |
-                                                    +---------------+---------------+
-                                                                    |
+|  - Título do Jogo: "Pillars of Security"                                         |
+|  - Seleção de Idioma: [ English ] [ Português ] [ Svenska ]                      |
++-------------------------------------------------+---------------------------------+
+                                                   |
+                                      (Seleciona idioma)
+                                                   |
+                                                   v
+                                    +-------------------------------+
+                                    |      [ SETUP DA PARTIDA ]     |
+                                    | - Vidas: 4.0 Corações (Max: 4)|
+                                    | - Placar / Acertos / Erros    |
+                                    | - 8 categorias, 3 cenários    |
+                                    |   sorteados por categoria     |
+                                    | - cafe_consumido = 0 (planej.)|
+                                    +---------------+---------------+
+                                                     |
 +-------------------------------------------------------------------+---------------------------------------------------+
 |                                                                   v                                                   |
 |                                                      [ HUB CENTRAL / NAVEGAÇÃO ]                                      |
-|                                    Movimento livre (W,A,S,D / Setas) entre as salas interconectadas                   |
+|                               Movimento livre em grade (W,A,S,D / Setas) dentro de cada sala                         |
+|                               Salas conectadas em linha por portas sólidas (bloqueiam passagem)                      |
 |                                                                                                                       |
 |             +-----------------+   +--------------------+   +-----------------------+   +-------------------+          |
 |             |   SALA DA TI    |   | SALA DA DIRETORIA  |   | REFEITÓRIO / COZINHA  |   | CONTABILIDADE / RH|          |
-|             | [Item Pergunta] |   |  [Item Pergunta]   |   | - [Item Pergunta]     |   |  [Item Pergunta]  |          |
-|             |                 |   |                    |   | - [CAFETEIRA ☕]      |   |                   |          |
+|             | phishing, usb,  |   |  social             |   | (sem quiz hoje —      |   | passwords,         |          |
+|             | ia              |   |                     |   |  reservado p/ café)   |   | documents,         |          |
+|             |                 |   |                    |   |                       |   | links, tailgating |          |
 |             +--------+--------+   +---------+----------+   +-----------+-----------+   +---------+---------+          |
 |                      |                      |                          |                         |                    |
-|                      +----------------------+                          |                         |                    |
-|                                             |                          |                         |                    |
-|                         (Interage c/ Item de Quiz)                     |                         |                    |
-|                                             |                          |                         |                    |
-|                                             +--------------------------+-------------------------+                    |
-|                                             |                          |                                              |
-|                                             v                          | (Interage c/ a Cafeteira: Espaço/Z)          |
-|                                +-------------------------+             |                                              |
-|                                |     [ MODAL QUIZ ]      |             v                                              |
-|                                | Responde Pergunta       |   +------------------------------------+                   |
-|                                +------------+------------+   |     [ EASTER EGG: CAFETEIRA ]      |                   |
-|                                             |                |   Checa: cafe_consumido < 2?       |                   |
-|                       +---------------------+                +-----------------+------------------+                   |
-|                       |                     |                                  |                                      |
-|                  (Acertou)              (Errou)                         (Sim)  |  (Não)                               |
-|                       |                     |                             +----+----+                                 |
-|                       v                     v                             |         |                                 |
-|         +---------------------------+ +---------------------------+       v         v                                 |
-|         |        [ ACERTO ]         | |         [ ERRO ]          |   +-------+ +-----------------------------+       |
-|         | - +0.5 Coração (até teto) | | - Perde 1.0 Coração       |   | TOMA  | | [ MENSAGEM NA TELA ]        |       |
-|         | - Trava pergunta          | +--------------+------------+   | CAFÉ  | | "A cafeteira está vazia...  |       |
-|         +-------------+-------------+                |                +---+---+ | já tomou café demais hoje!" |       |
-|                       |                              v                    |     +-----------------------------+       |
-|                       |                       (Corações <= 0?)            v                                           |
-|                       |                          /       \         +----------------------------------+               |
-|                       |                       (Sim)      (Não)     | - cafe_consumido += 1            |               |
-|                       |                         |          |       | - Vidas = min(Vidas + 0.5, Max)  |               |
-|                       |                         |          +---+   | - SFX: 'Gole / Slurp' ☕          |               |
-|                       |                         |              |   | - Balão: "+0.5 Vida restaurada!" |               |
-|                       v                         v              |   +------------------+---------------+               |
-|             (Concluiu perguntas?)       +---------------+      |                      |                               |
-|                /             \          | [ GAME OVER ] |      |                      |                               |
-|             (Sim)            (Não)      +-------+-------+      |                      |                               |
-|               |                |                |              |                      |                               |
-+---------------|----------------|----------------|--------------|----------------------|-------------------------------+
-                |                +----------------+--------------+----------------------+
-                v                                 v
-+-------------------------------+ +-------------------------------+
-|    [ VITÓRIA / CONCLUSÃO ]    | |      [ DERROTA / ESGOTADO ]   |
-| - Finalizou com vidas > 0     | | - Zerou os corações           |
-+---------------+---------------+ +---------------+---------------+
-                |                                 |
-                +----------------+----------------+
-                                 v
-                 +-------------------------------+
-                 |      [ TELA DE RESULTADO ]    |
-                 | - Nome do Jogador             |
-                 | - Ranking [ E a S ]           |
-                 | - Conquista extra:            |
-                 |   "Movido a Cafeína" (se tomou|
-                 |    os 2 cafés disponíveis)    |
-                 +-------------------------------+
+|                      +----------------------+--------- (porta: Ação encosta na parede) -----------+                    |
+|                                             |                                                                        |
+|                         (Encosta no NPC de uma categoria pendente)                                                   |
+|                                             |                                                                        |
+|                                             v                                                                        |
+|                                +-------------------------+             (Interação da cafeteira: PLANEJADO,          |
+|                                |   [ CENA DE ENCONTRO ]  |             ainda não implementado)                      |
+|                                | Responde o cenário      |                                                           |
+|                                +------------+------------+                                                           |
+|                                             |                                                                        |
+|                       +---------------------+                                                                        |
+|                       |                     |                                                                        |
+|                  (Acertou)              (Errou)                                                                      |
+|                       |                     |                                                                        |
+|                       v                     v                                                                        |
+|         +---------------------------+ +---------------------------+                                                  |
+|         |        [ ACERTO ]         | |         [ ERRO ]          |                                                  |
+|         | - +100 pontos             | | - Perde 1.0 Coração       |                                                  |
+|         | - +0.5 Coração (até teto) | | (2 meios-corações)        |                                                  |
+|         | - Trava o cenário         | +--------------+------------+                                                  |
+|         +-------------+-------------+                |                                                               |
+|                       |                              v                                                               |
+|                       |                       (Corações <= 0?)                                                       |
+|                       |                          /       \                                                           |
+|                       |                       (Sim)      (Não)                                                       |
+|                       |                         |          |                                                         |
+|                       v                         v          |                                                         |
+|             (Concluiu as 8 categorias,   +---------------+ |                                                         |
+|              em qualquer ordem/sala?)    | [ GAME OVER ] | |                                                         |
+|                /             \           +-------+-------+ |                                                         |
+|             (Sim)            (Não) ------------------------+ (volta a andar pelo hub)                               |
+|               |                |                 |                                                                   |
++---------------|----------------|-----------------|-------------------------------------------------------------------+
+                |                +--------- (continua explorando) ---+
+                v                                                    v
++-------------------------------+                      +-------------------------------+
+|    [ VITÓRIA / CONCLUSÃO ]    |                      |      [ DERROTA / ESGOTADO ]   |
+| - Todas as categorias feitas  |                      | - Zerou os corações            |
++---------------+---------------+                      +---------------+---------------+
+                |                                                      |
+                +------------------------------+-----------------------+
+                                                v
+                                +-------------------------------+
+                                |      [ TELA DE RESULTADO ]    |
+                                | - Ranking [ E a S ]           |
+                                | - Pontuação total             |
+                                | - Corações finais             |
+                                | - Breakdown de acerto por     |
+                                |   categoria (grade 4 colunas) |
+                                | - [ Baixar imagem ] [ Jogar   |
+                                |   novamente ]                 |
+                                | - (Nome do jogador: removido  |
+                                |   da UI — não pedimos mais)   |
+                                +-------------------------------+
+
+--------------------------------------------------------------------------------
+NOTAS DE STATUS (atualizado nesta rodada de ajustes)
+--------------------------------------------------------------------------------
+- Tela de "Ajuda" e menu de pausa (ESC/P) do GDD original: ainda não implementados.
+- Entrada de nome do jogador: removida de propósito, não faz mais parte do fluxo.
+- Cafeteira/easter egg: sala do Refeitório já está reservada (sem categoria de
+  quiz), mas a mecânica em si ainda não foi implementada.
+- Estilo visual: confirmado top-down estilo GBA Pokémon (perspectiva direta de
+  cima), não isométrico. Motor atual roda com placeholders coloridos; pixel
+  art real é o próximo passo (ver ideia-gdd.txt, seção 8).

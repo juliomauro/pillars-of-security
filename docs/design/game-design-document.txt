@@ -9,7 +9,11 @@ GAME DESIGN DOCUMENT (GDD) - CORPORATE OFFICE QUEST
 - Ideia / criação.  : Julio Mauro
 - Gênero            : Top-down 2D / Quiz de Exploração Corporativa
 - Plataforma-Alvo   : Web (Navegadores desktop)
-- Estilo Visual     : Pixel Art clássico (estilo 16-bit de escritório)
+- Estilo Visual     : Pixel Art top-down estilo GBA Pokémon (perspectiva direta
+                      de cima, confirmado — não isométrico). Protótipo testado
+                      com a arte de referência IMG-conceitos/perspetiva-superior-
+                      direta.jpeg. Motor atual ainda usa placeholders coloridos;
+                      pixel art real entra na pré-alfa (seção 8).
 - Público-Alvo      : Colaboradores da empresa / Treinamentos internos
 - Proposta Central  : O jogador explora salas temáticas da empresa, responde a
                       perguntas específicas de cada setor e gerencia suas vidas
@@ -18,96 +22,100 @@ GAME DESIGN DOCUMENT (GDD) - CORPORATE OFFICE QUEST
 
 2. ESQUEMA DE CONTROLES & INPUTS
 --------------------------------------------------------------------------------
-- Movimentação : Teclas Direcionais (Setas) OU W / A / S / D
-- Ação / Usar  : Barra de Espaço OU Tecla Z (interage com itens e menus)
-- Menu de Pausa: Tecla ESC OU Tecla P (abre opções rápidas de suspensão)
+- Movimentação : Teclas Direcionais (Setas) OU W / A / S / D [implementado]
+- Ação / Usar  : Barra de Espaço OU Tecla Enter [implementado — Tecla Z não
+                 foi usada, Enter faz esse papel]
+- Menu de Pausa: Tecla ESC OU Tecla P [planejado, ainda não implementado]
 
 
 3. TELAS & NAVEGAÇÃO DE INTERFACE (UI/UX)
 --------------------------------------------------------------------------------
-3.1. Tela de Abertura:
-  - Elementos Visuais : Logotipo da Empresa, Título do Jogo.
-  - Opções            : [ Início ] | [ Ajuda ].
+3.1. Tela de Abertura [implementado]:
+  - Elementos Visuais : Título do Jogo.
+  - Opções            : [ English ] | [ Português ] | [ Svenska ].
+  - Decisão: sem campo de nome do jogador. Reduzir fricção de entrada importa
+    mais do que personalizar o resultado — o jogo começa assim que escolhe o
+    idioma.
 
-3.2. Tela de Ajuda:
-  - Explicação dos controles (W/A/S/D, Espaço/Z, ESC).
+3.2. Tela de Ajuda [planejado, ainda não implementado]:
+  - Explicação dos controles (setas/WASD, Espaço/Enter).
   - Regras de corações (dano de 1.0 por erro, recuperação de 0.5 por acerto).
   - Explicação sobre as salas e a busca pelo Rank S.
   - Botão: [ Voltar ao Menu ].
 
-3.3. Entrada de Dados:
-  - Campo de texto para digitação do Nome do Jogador.
-  - Botão: [ Começar Jogo ].
-
-3.4. HUD em Tempo Real (Barra Superior Fixa):
+3.3. HUD em Tempo Real (Barra Superior Fixa) [implementado]:
   +----------------------------------------------------------------------------+
-  | NOME: [player_name] | SALA: [room_name] | VIDAS: ❤️❤️❤️ | PROGRESSO: 04/15 |
+  | Pillars of Security          | SALA: [room_name]      | VIDAS: ❤️❤️❤️❤️  |
+  |                               |                         | PONTOS: [score] |
   +----------------------------------------------------------------------------+
+  Sem indicador de progresso numérico (X/15) no HUD — o progresso aparece por
+  sala, pelos NPCs já marcados com ✅.
 
-3.5. Menu de Pausa (Modal suspenso via ESC / P):
+3.4. Menu de Pausa (Modal via ESC / P) [planejado, ainda não implementado]:
   - Opções: [ Continuar ] | [ Ver Controles ] | [ Reiniciar ] | [ Sair ao Menu ].
 
-3.6. Tela de Resultados (Conclusão ou Game Over):
-  - Exibição de: Nome do Jogador, Rank Final (E até S), Porcentagem de Acertos.
-  - Badge de Conquista: "Movido a Café ☕" (exibida se consumiu as 2 doses).
-  - Ações:
-    * Se Vitória   : [ Baixar Imagem / Certificado ] | [ Jogar Novamente ].
-    * Se Derrota   : [ Tentar Novamente ] | [ Voltar ao Menu ].
+3.5. Tela de Resultados (Conclusão ou Game Over) [implementado]:
+  - Exibição de: Rank Final (E até S), Pontuação, Corações finais, breakdown
+    de % de acerto por categoria (grade de 4 colunas).
+  - Sem nome do jogador na tela — removido de propósito (ver 3.1).
+  - Badge de Conquista "Movido a Café ☕": planejado, depende da mecânica da
+    cafeteira (seção 6) ainda não implementada.
+  - Ações: [ Baixar Imagem ] | [ Jogar Novamente ].
 
 
 4. CORE LOOP & REGRAS DE GAMEPLAY
 --------------------------------------------------------------------------------
 4.1. Ciclo Central de Jogo:
-  [ Entrar na Sala ] ──► [ Aproximar do Item ] ──► [ Pressionar Ação ]
-          ▲                                               │
-          │                                               ▼
-  [ Continuar Exploração ] ◄── [ Atualizar Vidas ] ◄── [ Responder Quiz ]
+  [ Entrar na Sala ] ──► [ Esbarrar no NPC da categoria ] ──► [ Cena de Encontro ]
+          ▲                                                          │
+          │                                                          ▼
+  [ Continuar Exploração ] ◄── [ Atualizar Vidas/Pontos ] ◄── [ Responder Cenário ]
+
+  Portas entre salas são sólidas (bloqueiam o movimento como qualquer móvel):
+  o jogador para do lado da porta e pressiona Ação pra atravessar, não anda
+  por cima dela.
 
 4.2. Condições de Fim de Jogo:
-  - Vitória : Responder a todas as perguntas do mapa com vida_atual > 0.
+  - Vitória : Concluir as 8 categorias (em qualquer ordem/sala) com
+              vida_atual > 0.
   - Derrota : vida_atual atingir 0 (Game Over instantâneo, Rank E).
 
 4.3. Economia de Vidas & Teto (Cap):
-  - Vida Inicial : 3.0 Corações cheios.
-  - Vida Máxima  : 3.0 Corações (teto absoluto).
-  - Erro         : Perde 1.0 Coração.
-  - Acerto       : Recupera +0.5 Coração (fórmula: min(vida_atual + 0.5, 3.0)).
+  - Vida Inicial : 4.0 Corações cheios.
+  - Vida Máxima  : 4.0 Corações (teto absoluto).
+  - Erro         : Perde 1.0 Coração (2 meios-corações).
+  - Acerto       : +100 pontos e recupera +0.5 Coração
+                    (fórmula: min(vida_atual + 0.5, 4.0)).
 
-4.4. Trava de Repetição do Item (Anti-Farming):
-  - Todo item de quiz possui a flag booleana `is_answered = false`.
-  - Ao responder à pergunta, `is_answered` passa para `true`.
-  - O item ganha estado visual inativo (sprite acinzentado + ícone check verde).
-  - O gatilho de colisão de ação é desativado para aquele item.
+4.4. Progressão por Categoria (Anti-Farming / Anti-Repetição):
+  - Cada categoria tem um banco de 3 cenários sorteados aleatoriamente no
+    início da partida (sem repetir dentro da mesma run — rejogar depois
+    pode trazer cenários diferentes).
+  - O NPC da categoria avança um índice a cada cenário respondido; ao
+    concluir os 3, o NPC vira um ícone fixo "✅ [categoria]" e para de
+    disparar encontros, mas continua visitável livremente.
 
 
 5. ARQUITETURA DAS FASES (LEVEL DESIGN)
 --------------------------------------------------------------------------------
-O cenário é um escritório contínuo com movimentação livre entre 5 salas:
+O cenário é um escritório contínuo, 5 salas em linha conectadas por portas
+sólidas (Ação pra atravessar). 8 categorias de cenário distribuídas assim,
+sem relação 1-para-1 entre categoria e sala (segurança acontece em qualquer
+setor da empresa):
 
-- Sala da TI:
-  * Itens : Servidor em rack, workstation ou roteador.
-  * Tema  : Segurança da informação, senhas, phishing e uso de dispositivos.
+- Sala da TI: phishing, usb, ia.
+- Sala da Diretoria: social (engenharia social).
+- Refeitório / Cozinha: sem categoria de quiz por enquanto — reservada para
+  o easter egg da cafeteira (seção 6, ainda não implementado).
+- Sala da Contabilidade: passwords, documents.
+- Sala do RH: links, tailgating.
 
-- Sala da Diretoria:
-  * Itens : Mesa de reuniões, projetor ou pasta confidencial.
-  * Tema  : Governança, compliance, visão estratégica e metas globais.
-
-- Refeitório / Cozinha:
-  * Itens : Geladeira comunitária, mesa de lanche e Cafeteira.
-  * Tema  : Ergonomia, convivência, descarte correto de lixo e bem-estar.
-
-- Sala da Contabilidade:
-  * Itens : Calculadora, balancete na mesa ou cofre.
-  * Tema  : Notas fiscais, relatórios de despesas, reembolsos e integridade.
-
-- Sala do RH:
-  * Itens : Quadro de avisos, fichário ou mesa de entrevistas.
-  * Tema  : Políticas internas, diversidade, conduta e benefícios.
+Cada categoria sorteia 3 cenários de um banco maior a cada partida (ver 4.4).
 
 
-6. MECÂNICA DE EASTER EGG (MÁQUINA DE CAFÉ)
+6. MECÂNICA DE EASTER EGG (MÁQUINA DE CAFÉ) [planejado, não implementado]
 --------------------------------------------------------------------------------
-- Localização : Cozinha / Refeitório.
+- Localização : Cozinha / Refeitório (sala já reservada sem categoria de quiz).
 - Variável    : `cafe_count` (inicia em 0, máximo 2).
 - Comportamento Visual:
   * Enquanto `cafe_count < 2`: Cafeteira com partículas animadas de vapor subindo.
@@ -115,7 +123,7 @@ O cenário é um escritório contínuo com movimentação livre entre 5 salas:
 - Interação:
   * Se `cafe_count < 2`:
     - Incrementa `cafe_count += 1`.
-    - Recupera +0.5 Coração: `vida_atual = min(vida_atual + 0.5, 3.0)`.
+    - Recupera +0.5 Coração: `vida_atual = min(vida_atual + 0.5, 4.0)`.
     - Toca efeito sonoro de gole/xícara (SFX Slurp).
     - Exibe balão flutuante: "+0.5 Vida recuperada!".
   * Se `cafe_count >= 2`:
@@ -143,16 +151,42 @@ Cálculo base: `precisao = (acertos / total_perguntas) * 100`
 
 8. ASSETS & PACOTE DE ÁUDIO REQUERIDOS
 --------------------------------------------------------------------------------
-- Sprites:
+- Estado atual: motor roda 100% com placeholders coloridos (retângulos
+  gerados via Phaser Graphics). Testamos um protótipo com a arte de
+  referência real (IMG-conceitos/perspetiva-superior-direta.jpeg) como fundo
+  estático escalado pro canvas 800x600 — confirmou que o estilo GBA Pokémon
+  top-down funciona bem na escala do jogo. Falta: tileset recortável (parede/
+  chão/móveis por tile) e spritesheet do personagem com 4 direções.
+
+- Sprites necessários pra pré-alfa:
+  * Tileset de escritório (chão, paredes, mesas, plantas, portas) recortável
+    em tiles de 16x16 ou 32x32 — mesmo grid do motor atual.
   * Personagem (andando em 4 direções: cima, baixo, esquerda, direita).
   * Itens interativos ativos e inativos (computador, balancete, projetor).
-  * Cafeteira com e sem fumaça.
+  * Cafeteira com e sem fumaça (quando a mecânica da seção 6 for implementada).
   * Ícones de corações: Cheio (❤️), Meio (💔/coração cortado) e Vazio (🖤).
+
+- Biblioteca escolhida como alvo final: LimeZu "Modern Interiors" + "Modern
+  Office - Revamped" (itch.io, ~$2,50, estilo RPG Maker mas é PNG puro,
+  funciona em Phaser, já vem com gerador de personagem 4 direções).
+  https://limezu.itch.io/modernoffice
+
+- Alternativas gratuitas levantadas pra validar o jogo antes de comprar
+  (nenhuma escolhida ainda):
+  * Kenney "RPG Urban Kit" (CC0, gratuito, mais focado em exterior/urbano
+    que escritório interno).
+  * "Top-Down Pixel Art Characters" da Game Between The Lines (gratuito,
+    só personagens, não resolve o tileset do ambiente).
+  * FuzzyButtGaming "Tables and Computer Desks 0" (gratuito, só mesas e
+    computadores avulsos, sem chão/parede).
+  * Rejeitado: "Little Bits: Office" (AdricCustoms) — não agradou
+    visualmente, não reconsiderar.
+
 - Efeitos Sonoros (SFX):
   * Passos do personagem.
   * Interação / Abrir menu.
   * Resposta correta (ding positivo).
   * Resposta errada (buzzer negativo).
-  * Tomar café (gole/xícara).
+  * Tomar café (gole/xícara) — depende da seção 6.
   * Game Over e Fanfarra de Vitória.
 ================================================================================

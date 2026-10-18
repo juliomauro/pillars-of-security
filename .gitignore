@@ -1,0 +1,7 @@
+.DS_Store
+
+# Raw pixel-art source packs (free + purchased). Both licenses forbid
+# redistributing the asset itself, and this repo is public — only the
+# small sprites actually extracted into src/assets/ (edited, used in the
+# project, which the licenses do allow) are tracked.
+/pixelart/
