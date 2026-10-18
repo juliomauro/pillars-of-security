@@ -1,5 +1,5 @@
-// Single source of truth for max lives: 3 full hearts.
-const MAX_HALF_HEARTS = 6;
+// Single source of truth for max lives: 4 full hearts.
+const MAX_HALF_HEARTS = 8;
 
 // Renders a row of heart icons for `halfHearts` out of `maxHalfHearts`.
 // Each heart slot is worth 2 half-points: full (both), half (one), empty (none).

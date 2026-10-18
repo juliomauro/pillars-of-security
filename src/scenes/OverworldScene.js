@@ -11,8 +11,8 @@ const PLAYER_START = { col: 12, row: 9 };
 // Five rooms, connected in a line by doors. Rooms are just a realistic
 // setting — security issues happen everywhere in a company, so the same six
 // scenario categories are simply spread across these rooms rather than each
-// room having its own dedicated topic. Doors are plain walkable tiles the
-// player must stand on and press Action on to cross.
+// room having its own dedicated topic. Doors are solid tiles: the player
+// stops in front of one and presses Action (while adjacent to it) to cross.
 const ROOMS = [
   {
     name: 'Sala de TI',
@@ -170,6 +170,15 @@ class OverworldScene extends Phaser.Scene {
     room.doors.forEach(door => {
       const pos = gridToPixel(door.col, door.row);
       this.add.sprite(pos.x, pos.y, 'door');
+
+      const destinationName = ROOMS[door.toRoom].name;
+      // Put the sign in the free tile above the door, or below it when the
+      // door sits on the top row and there's no room above.
+      const signOffsetY = door.row === 0 ? 30 : -30;
+      this.add.text(pos.x, pos.y + signOffsetY, `🚪 ${destinationName}`, {
+        fontSize: '11px', color: '#f5d76e', backgroundColor: '#1a1a2e', padding: { x: 4, y: 2 }
+      }).setOrigin(0.5);
+
       this.doors.push(door);
     });
   }
@@ -294,8 +303,12 @@ class OverworldScene extends Phaser.Scene {
     }
   }
 
+  // Doors are solid (see tryMove) — the player stops right in front of one,
+  // so Action checks the four adjacent tiles, not the tile they're standing on.
   tryUseDoorHere() {
-    const door = this.doors.find(d => d.col === this.playerGrid.col && d.row === this.playerGrid.row);
+    const { col, row } = this.playerGrid;
+    const adjacent = [[col, row - 1], [col, row + 1], [col - 1, row], [col + 1, row]];
+    const door = this.doors.find(d => adjacent.some(([c, r]) => c === d.col && r === d.row));
     if (door) this.useDoor(door);
   }
 
@@ -311,14 +324,17 @@ class OverworldScene extends Phaser.Scene {
       return;
     }
 
-    // Ambient NPCs and obstacles (desks/furniture) are solid too. Doors are
-    // walkable — crossing them does nothing, Action is what triggers a room
-    // change (see tryUseDoorHere).
+    // Ambient NPCs, obstacles (desks/furniture) and doors are all solid —
+    // the player stops in front of a door and uses Action to go through
+    // (see tryUseDoorHere), rather than walking onto its tile.
     const blockedByAmbient = this.ambientNpcs.some(n => n.col === targetCol && n.row === targetRow);
     if (blockedByAmbient) return;
 
     const blockedByObstacle = this.obstacles.some(o => o.col === targetCol && o.row === targetRow);
     if (blockedByObstacle) return;
+
+    const blockedByDoor = this.doors.some(d => d.col === targetCol && d.row === targetRow);
+    if (blockedByDoor) return;
 
     this.isMoving = true;
     this.playerGrid = { col: targetCol, row: targetRow };

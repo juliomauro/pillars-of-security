@@ -21,7 +21,6 @@ class ResultsScene extends Phaser.Scene {
   create({ reason }) {
     this.cameras.main.setBackgroundColor('#0f0f1e');
 
-    const name = this.registry.get('playerName') || '???';
     const score = this.registry.get('score') || 0;
     const halfHearts = this.registry.get('halfHearts') || 0;
     const correctCount = this.registry.get('correctCount') || 0;
@@ -35,8 +34,7 @@ class ResultsScene extends Phaser.Scene {
     this.add.text(400, 30, title, { fontSize: '22px', color: '#e94560' }).setOrigin(0.5);
     this.add.text(400, 58, sub, { fontSize: '12px', color: '#aaaaaa' }).setOrigin(0.5);
 
-    this.add.text(400, 95, `${t(this, 'playerLabel')}: ${name}`, { fontSize: '15px', color: '#ffffff' }).setOrigin(0.5);
-    this.add.text(400, 118, `${t(this, 'scoreLabel')}: ${score}`, { fontSize: '15px', color: '#ffffff' }).setOrigin(0.5);
+    this.add.text(400, 105, `${t(this, 'scoreLabel')}: ${score}`, { fontSize: '15px', color: '#ffffff' }).setOrigin(0.5);
 
     renderHearts(this, 338, 148, halfHearts);
     this.add.text(400, 180, `${t(this, 'livesLabel')}: ${halfHearts / 2}/${MAX_HALF_HEARTS / 2}`, { fontSize: '11px', color: '#aaaaaa' }).setOrigin(0.5);

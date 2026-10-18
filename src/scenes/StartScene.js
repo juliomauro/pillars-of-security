@@ -20,40 +20,27 @@ class StartScene extends Phaser.Scene {
     langs.forEach(([code, label], i) => {
       this.makeButton(400, 250 + i * 60, label, () => {
         this.registry.set('language', code);
-        this.renderNameStep();
+        this.startGame();
       });
     });
+
+    this.add.text(400, 570, '🧪 Protótipo da sala em pixel art (dev)', {
+      fontSize: '11px', color: '#555566'
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => this.scene.start('PixelRoomProto'));
   }
 
-  renderNameStep() {
-    this.children.removeAll(true);
-    this.add.text(400, 130, t(this, 'namePromptTitle'), { fontSize: '22px', color: '#4ecca3' }).setOrigin(0.5);
-
-    this.makeButton(400, 220, t(this, 'enterName'), () => {
-      const name = window.prompt(t(this, 'namePromptTitle'));
-      if (name && name.trim()) {
-        this.registry.set('playerName', name.trim().slice(0, 20));
-        this.nameLabel.setText(`${t(this, 'playerLabel')}: ${this.registry.get('playerName')}`);
-      }
-    });
-
-    this.nameLabel = this.add.text(
-      400, 290, `${t(this, 'playerLabel')}: ${this.registry.get('playerName')}`,
-      { fontSize: '14px', color: '#ffffff' }
-    ).setOrigin(0.5);
-
-    this.makeButton(400, 400, t(this, 'start'), () => {
-      this.registry.set('halfHearts', MAX_HALF_HEARTS);
-      this.registry.set('score', 0);
-      this.registry.set('attemptedCount', 0);
-      this.registry.set('correctCount', 0);
-      this.registry.set('categoryBanks', buildCategoryBanks());
-      this.registry.set('categoryQueueIndex', buildInitialQueueIndex());
-      this.registry.set('categoryStats', buildInitialCategoryStats());
-      this.registry.set('currentRoom', 0);
-      this.registry.set('pendingEntry', null);
-      this.scene.start('Overworld');
-    });
+  startGame() {
+    this.registry.set('halfHearts', MAX_HALF_HEARTS);
+    this.registry.set('score', 0);
+    this.registry.set('attemptedCount', 0);
+    this.registry.set('correctCount', 0);
+    this.registry.set('categoryBanks', buildCategoryBanks());
+    this.registry.set('categoryQueueIndex', buildInitialQueueIndex());
+    this.registry.set('categoryStats', buildInitialCategoryStats());
+    this.registry.set('currentRoom', 0);
+    this.registry.set('pendingEntry', null);
+    this.scene.start('Overworld');
   }
 
   makeButton(x, y, label, onClick) {
