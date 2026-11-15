@@ -138,8 +138,10 @@
 
     <!-- 2. TELA DE ABERTURA (MenuScene Overlay) -->
     <div id="menu-overlay" class="hidden fixed inset-0 z-20 flex flex-col items-center justify-between py-4 sm:py-6 px-4 pointer-events-none">
+        <!-- espaco superior (empurra o cabecalho para o centro) -->
+        <div aria-hidden="true"></div>
         <!-- Cabeçalho do Menu com Logo Sinch em Pixel-Art 2.5D -->
-        <div class="text-center mt-1 pointer-events-auto bg-slate-950/90 border-2 border-sky-500/50 px-6 py-3.5 rounded-2xl shadow-2xl backdrop-blur-md">
+        <div class="text-center pointer-events-auto bg-slate-950/90 border-2 border-sky-500/50 px-6 py-3.5 rounded-2xl shadow-2xl backdrop-blur-md">
             <div class="flex flex-col items-center justify-center mb-1.5">
                 <div class="bg-slate-900/90 border-2 border-amber-400/40 px-5 py-2 rounded-xl shadow-inner mb-2 flex items-center justify-center">
                     <canvas id="menu-sinch-logo" width="176" height="84" class="h-14 sm:h-16 w-auto drop-shadow-[0_4px_10px_rgba(255,190,60,0.28)]" style="image-rendering: pixelated;"></canvas>
@@ -156,9 +158,6 @@
                 Sinch Security Team
             </p>
         </div>
-
-        <!-- Espaço central para o preview animado do personagem Phaser -->
-        <div class="h-36"></div>
 
         <!-- Seleção de Idioma (Início Imediato: Apenas English e Português) + Ajuda -->
         <div class="w-full max-w-md pointer-events-auto voxel-card rounded-2xl p-5 text-center">
@@ -3323,35 +3322,7 @@ class MenuScene extends Phaser.Scene {
             }
         }
 
-        const platform = this.add.graphics();
-        platform.fillStyle(0x1e293b, 0.92);
-        platform.lineStyle(4, 0x38bdf8, 1);
-        platform.fillRoundedRect(350, 195, 260, 150, 20);
-        platform.strokeRoundedRect(350, 195, 260, 150, 20);
-
-        // Emblema Sinch Pixel-Art no tapete corporativo do palco de abertura
-        this.add.image(480, 218, 'sinch_logo_pixel').setScale(0.42).setAlpha(0.35);
-
-        this.previewAgent = this.add.sprite(480, 262, 'char_player', 0).setScale(2.2);
-        this.previewAgent.play('char_player_walk_down');
-
-        const npcLeft = this.add.sprite(395, 270, 'npc_phishing', 0).setScale(1.4);
-        npcLeft.play('npc_phishing_walk_right');
-        const npcRight = this.add.sprite(565, 270, 'npc_tailgating', 0).setScale(1.4);
-        npcRight.play('npc_tailgating_walk_left');
-
-        const dirs = ['down', 'right', 'up', 'left'];
-        let dIdx = 0;
-        this.time.addEvent({
-            delay: 1800,
-            loop: true,
-            callback: () => {
-                dIdx = (dIdx + 1) % dirs.length;
-                if (this.previewAgent && this.previewAgent.anims) {
-                    this.previewAgent.play(`char_player_walk_${dirs[dIdx]}`);
-                }
-            }
-        });
+        // preview de personagens removido da tela inicial
     }
 }
 
