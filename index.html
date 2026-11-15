@@ -47,9 +47,6 @@
         #phaser-container {
             width: 100%;
             height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
         #phaser-container canvas {
             border-radius: 12px;
@@ -4279,7 +4276,7 @@ class GameScene extends Phaser.Scene {
             if (nearest.type === 'coffee') label = t.prompts.pressToCoffee;
 
             this.promptText.setText(label);
-            this.promptBgRect.width = this.promptText.width + 24;
+            this.promptBgRect.setSize(this.promptText.width + 24, 28);
             this.promptContainer.setPosition(
                 Phaser.Math.Clamp(this.player.x, 130, 830),
                 Math.max(40, this.player.y - 42)
