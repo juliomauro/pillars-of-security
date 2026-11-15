@@ -1,0 +1,403 @@
+Atue como um Desenvolvedor Sênior de Jogos Web especializado em HTML5, JavaScript (ES6+) e Phaser 3. Crie do zero o projeto completo, jogável e polido do jogo "Pillars of Security" (um RPG/Quiz corporativo top-down 2D com estética cúbica pixel-art original estilo Minicraft) seguindo rigorosamente todas as especificações abaixo.
+
+================================================================================
+1. ARQUITETURA E ESTRUTURA DE ARQUIVOS
+================================================================================
+Organize o projeto de forma modular e limpa, criando todos os arquivos necessários sem omitir código:
+- index.html (carregando Phaser 3 via CDN oficial + fontes pixel/clean + containers dos modais HTML/CSS)
+- style.css (estilização moderna, responsiva e nítida para HUD, modais de perguntas, ajuda, pausa e tela final)
+- src/main.js (configuração da instância Phaser e inicialização)
+- src/utils/AudioSynth.js (sintetizador de efeitos sonoros via Web Audio API sem arquivos externos)
+- src/utils/VoxelArtGenerator.js (gerador procedural de sprites e tiles cúbicos pixel-art originais)
+- src/data/questions.js (banco completo das 30 perguntas e traduções da UI)
+- src/scenes/BootScene.js
+- src/scenes/MenuScene.js
+- src/scenes/GameScene.js
+- src/scenes/ResultScene.js
+
+================================================================================
+2. DIREÇÃO DE ARTE: ESTÉTICA CÚBICA ORIGINAL (ESTILO MINICRAFT / VOXEL PIXEL-ART)
+================================================================================
+Não utilize assets externos nem placeholders retangulares simples. Crie em src/utils/VoxelArtGenerator.js um gerador de texturas (RenderTexture / Graphics) com visual cúbico/blocado original em pixel-art top-down 2.5D (com iluminação no topo, face frontal mais escura para dar volume de bloco/cubo e sombras projetadas no chão):
+- Personagem Jogável (Agente de Segurança): Boneco cúbico estilizado estilo Minicraft (cabeça quadrada com cabelo/fones, tronco blocado, braços e pernas articulados). Gere frames de animação para 4 direções (cima, baixo, esquerda, direita) com movimento de caminhada (balanço de braços/pernas) e sombra circular/quadrada nos pés.
+- NPCs Temáticos Cúbicos: Gere sprites cúbicos originais com cores e acessórios distintos para cada setor/categoria:
+  * Phishing (TI): Técnico com crachá azul e óculos.
+  * USB Desconhecido (TI): Analista com jaleco/colete verde e detalhe de pendrive.
+  * Engenharia Social (Diretoria): Executivo cúbico de terno escuro e gravata.
+  * Senhas (Contabilidade): Contador com camisa social amarela/dourada.
+  * Links Suspeitos (RH): Especialista de RH com blazer roxo.
+  * Tailgating (RH/Segurança): Guarda/Recepcionista cúbico com uniforme de segurança e quepe.
+- Cenário e Móveis em Blocos (Tiles 32x32 ou 48x48):
+  * Chão quadriculado corporativo com textura de blocos sutis.
+  * Paredes em blocos 2.5D (mostrando o topo da parede e a face frontal sombreada).
+  * Mesas cúbicas com monitores pixelados, cadeiras, plantas em vasos quadrados, catracas/portas sólidas bloqueáveis (com luz vermelha/verde) e uma Máquina de Café cúbica detalhada no Refeitório.
+
+================================================================================
+3. ÁUDIO PROCEDURAL (src/utils/AudioSynth.js)
+================================================================================
+Implemente efeitos sonoros 8-bit/retro gerados via Web Audio API (com botão de Mute/Unmute no HUD):
+- Passos suaves ao andar.
+- Som de interação / abrir porta / abrir modal.
+- Som de acerto (arpejo ascendente alegre).
+- Som de erro (grave descendente).
+- Som de tomar café (efeito de gole/bolhas + brilho).
+- Fanfarra de Vitória e som de Game Over.
+
+================================================================================
+4. FLUXO DE TELAS, UI/UX E IDIOMAS
+================================================================================
+4.1. Tela de Abertura (MenuScene):
+- Título estilizado: "Pillars of Security" | Subtítulo: Sinch Security Team.
+- Preview animado do personagem cúbico no centro da tela.
+- Botões de idioma: [ English ] | [ Português ] | [ Svenska ].
+- Regra: NÃO pedir nome do jogador. Clicar no idioma inicia o jogo imediatamente (traduza toda a interface, HUD, nomes das salas, botões e feedbacks nos 3 idiomas; mantenha o texto das perguntas em Português caso não haja tradução).
+- Botão [ Como Jogar / Ajuda ]: abre modal explicando controles, sistema de corações, salas, cafeteira e critérios do Rank S.
+
+4.2. HUD Superior Fixo (GameScene):
+- Exibir: Pillars of Security | SALA: [Nome da Sala Atual] | VIDAS: ❤️❤️❤️❤️ (suportando coração cheio, meio coração e coração vazio) | PONTOS: [Score] | Botão [ 🔊 ] e [ ⏸️ Pausa ].
+- Tecla ESC ou P abre o Menu de Pausa com: [ Continuar ], [ Ver Controles ], [ Reiniciar ], [ Sair ao Menu ].
+
+4.3. Tela de Resultados (ResultScene):
+- Exibir: Rank Final (S, A, B, C, D ou E), Pontuação Total, Corações Finais e uma grade responsiva mostrando a % de acerto por categoria.
+- Se cafe_count >= 1, exibir a badge especial: "Movido a Café ☕".
+- Botões: [ Baixar Imagem ] (gera e baixa um PNG do card de resultado via Canvas) e [ Jogar Novamente ].
+
+================================================================================
+5. LEVEL DESIGN (5 SALAS) E MECÂNICAS DE GAMEPLAY
+================================================================================
+- Controles: Setas direcionais ou WASD para movimentação fluida em grade (com colisão nos móveis e paredes). Espaço ou Enter para interagir.
+- Arquitetura das 5 Salas Conectadas em Linha por Portas Sólidas:
+  * As portas entre salas são sólidas (bloqueiam passagem). O jogador deve encostar na porta e apertar Espaço ou Enter para atravessar para a próxima sala (ou voltar).
+  * Sala 1 - TI: Contém os NPCs das categorias phishing e usb (deixe preparado na arquitetura suporte futuro para categoria ia).
+  * Sala 2 - Diretoria: Contém o NPC da categoria social (Engenharia Social).
+  * Sala 3 - Refeitório / Cozinha: Sem NPCs de quiz. Contém a Máquina de Café interativa.
+  * Sala 4 - Contabilidade: Contém o NPC da categoria passwords (deixe preparado suporte futuro para categoria documents).
+  * Sala 5 - RH: Contém os NPCs das categorias links e tailgating.
+
+- Regras de Vidas e Pontuação:
+  * Vida inicial: 4.0 corações (teto máximo absoluto = 4.0).
+  * Erro: Perde 1.0 coração. Se vida_atual <= 0, dispara Game Over imediato (Rank E).
+  * Acerto: Ganha +100 pontos e recupera +0.5 coração (Math.min(vida_atual + 0.5, 4.0)).
+
+- Sistema de Encontros (3 Cenários Sorteados por NPC):
+  * No início de cada partida, sorteie 3 perguntas aleatórias do banco de 5 perguntas de cada categoria (sem repetir na mesma partida).
+  * Ao encostar/interagir com um NPC pendente, abre-se o Modal de Cenário mostrando a situação e 3 botões de escolha (a, b, c).
+  * Após clicar em uma opção, o modal exibe se acertou ou errou, destaca a resposta correta e mostra os bullet points de Explicação, com um botão [ Continuar ] (ou Espaço/Enter).
+  * Ao concluir as 3 perguntas de um NPC, ele passa a exibir um ícone fixo "✅ [Categoria]" acima da cabeça e não dispara mais perguntas.
+  * Vitória: Concluir todas as 6 categorias ativas no mapa com vida_atual > 0.
+
+- Easter Egg - Máquina de Café (Refeitório):
+  * Variável cafe_count = 0 (máximo 2).
+  * Enquanto cafe_count < 2: exibir partículas animadas de vapor subindo da cafeteira. Ao interagir: cafe_count++, recupera +0.5 coração (Math.min(vida + 0.5, 4.0)), toca som de gole e mostra balão flutuante "+0.5 Vida recuperada!".
+  * Quando cafe_count == 2: o vapor para e ao interagir exibe diálogo: "A cafeteira está vazia... já tomou café demais hoje!".
+
+- Cálculo de Rank:
+  * precisao = (acertos / total_perguntas_respondidas) * 100
+  * Rank S: precisao === 100 E vida_atual === 4.0
+  * Rank A: 85 <= precisao < 100
+  * Rank B: 70 <= precisao < 85
+  * Rank C: 50 <= precisao < 70
+  * Rank D: 30 <= precisao < 50
+  * Rank E: precisao < 30 OU Game Over (vida_atual <= 0)
+
+================================================================================
+6. BANCO DE PERGUNTAS COMPLETO (src/data/questions.js)
+================================================================================
+Utilize exatamente estas 30 perguntas (6 categorias, 5 perguntas por categoria), marcando a opção correta (✓) e exibindo a explicação após cada resposta:
+
+------------------------------
+CATEGORIA 1: phishing (Phishing)
+------------------------------
+
+1. Situação: Um e-mail chega com o logotipo do financeiro, pedindo revalidação imediata do cadastro bancário pra não atrasar o salário. O link expira em 1 hora.
+   a) Clicar no link rápido pra não perder o prazo
+   b) [CORRETA] Reportar o e-mail ao time de segurança sem clicar em nada
+   c) Responder o e-mail perguntando se é legítimo
+   Explicação:
+   - Urgência artificial ("expira em 1 hora") é tática clássica de phishing
+   - Dados bancários nunca devem ser "revalidados" por link de e-mail
+   - O financeiro real não usa esse tipo de abordagem — reportar é sempre o caminho seguro
+
+2. Situação: Uma transportadora avisa que uma encomenda não pôde ser entregue e manda baixar um anexo .zip com o "comprovante".
+   a) Baixar e abrir o .zip pra ver o comprovante
+   b) Apagar o e-mail sem reportar
+   c) [CORRETA] Reportar como phishing e não abrir o anexo
+   Explicação:
+   - Arquivos .zip anexados pedindo abertura imediata são um vetor clássico de malware
+   - Transportadoras reais não enviam "comprovantes" executáveis por e-mail
+   - Apagar sem reportar deixa o time de segurança sem visibilidade do ataque
+
+3. Situação: Um fornecedor parceiro pede atualização dos dados de cobrança, mas o domínio do remetente tem uma letra trocada por um número.
+   a) Atualizar os dados, já que parece ser do fornecedor de sempre
+   b) [CORRETA] Reportar o e-mail e confirmar o pedido por um canal já conhecido do fornecedor
+   c) Ignorar e não fazer nada
+   Explicação:
+   - Domínio levemente alterado (typosquatting) é um sinal clássico de phishing direcionado
+   - Mudança de dados de cobrança sempre deve ser confirmada por um canal independente, não pelo próprio e-mail suspeito
+   - Ignorar sem reportar deixa outros colegas vulneráveis ao mesmo ataque
+
+4. Situação: Um e-mail promocional oferece vale-compras aos primeiros 50 que preencherem um formulário com suas credenciais de rede.
+   a) Preencher rápido antes que as vagas acabem
+   b) [CORRETA] Reportar como phishing — credenciais de rede nunca são pedidas assim
+   c) Preencher só com uma senha fake pra testar
+   Explicação:
+   - Nenhuma promoção legítima pede credenciais de rede corporativa
+   - Mesmo uma senha "fake" no campo errado pode indicar a um atacante que o e-mail foi aberto e interagido
+   - RH/Marketing reais não coletam login de rede para sorteios
+
+5. Situação: Você percebeu que acabou de clicar num link suspeito e digitou sua senha numa página falsa. E agora?
+   a) Trocar a senha depois, não tem tanta pressa
+   b) [CORRETA] Avisar o time de segurança imediatamente e trocar a senha agora
+   c) Não contar pra ninguém, pra não passar vergonha
+   Explicação:
+   - Quanto mais rápido avisar, menor a janela de tempo pro atacante usar a credencial
+   - Trocar a senha imediatamente limita o estrago
+   - Não contar é o pior cenário — o time de segurança não consegue agir no que não sabe que aconteceu
+
+------------------------------
+CATEGORIA 2: social (Engenharia Social)
+------------------------------
+
+1. Situação: Alguém liga dizendo ser do suporte de TI e pede sua senha "temporariamente" pra aplicar um patch crítico antes do fim do expediente.
+   a) Passar a senha, já que é urgente
+   b) [CORRETA] Negar e orientar a pessoa a abrir um chamado oficial
+   c) Passar só os últimos 4 dígitos
+   Explicação:
+   - TI nunca precisa da sua senha pra aplicar patches — isso é feito sem a credencial pessoal do usuário
+   - Urgência por telefone é uma tática clássica de pretexting
+   - Mesmo parcial, nenhuma informação de senha deve ser compartilhada por telefone
+
+2. Situação: Mensagem urgente no celular, supostamente do CEO, pedindo sigilo total e compra emergencial de cartões-presente.
+   a) Comprar rápido, é o CEO pedindo
+   b) [CORRETA] Verificar por outro canal oficial antes de agir, e reportar a tentativa
+   c) Ignorar e apagar a mensagem
+   Explicação:
+   - Pedido de sigilo + urgência + compra de cartão-presente é um padrão clássico de golpe de CEO (BEC)
+   - Executivos reais não pedem esse tipo de compra por mensagem informal e sigilosa
+   - Verificar por canal oficial (ramal conhecido, outro colega) desmonta o golpe rapidamente
+
+3. Situação: Alguém liga dizendo ter encontrado seu crachá e pede confirmação de CPF, data de nascimento e matrícula "pra garantir que é você".
+   a) Confirmar os dados pra recuperar o crachá
+   b) [CORRETA] Não confirmar nenhum dado por telefone e verificar direto com a recepção/segurança
+   c) Pedir pra pessoa ficar com o crachá já que não é tão importante
+   Explicação:
+   - Dados como CPF e matrícula nunca devem ser confirmados por telefone pra um desconhecido
+   - Esse é um pretexto clássico de coleta de dados pessoais (PII) pra fraude de identidade
+   - Verificar direto com a recepção/segurança da empresa é o caminho seguro
+
+4. Situação: Um prestador uniformizado diz que veio fazer manutenção preventiva nos notebooks e pede que todos deixem as máquinas destravadas.
+   a) Destravar a máquina pra agilizar o serviço
+   b) [CORRETA] Exigir identificação formal e acompanhamento, sem destravar nada sem verificação
+   c) Destravar só se for rapidinho
+   Explicação:
+   - Nenhum prestador legítimo pede pra deixar notebooks destravados sem supervisão
+   - Verificar identificação e ter uma pessoa responsável acompanhando é o procedimento correto
+   - "Rapidinho" não reduz o risco — bastam segundos pra instalar algo malicioso
+
+5. Situação: Alguém liga se passando pela operadora de telefonia, pedindo que você dite um código de SMS de 6 dígitos recebido no seu celular corporativo, pra "validar a linha".
+   a) Ditar o código, já que é a operadora
+   b) [CORRETA] Desligar e não compartilhar o código — isso é tentativa de sequestro de conta/SIM swap
+   c) Ditar só os 3 primeiros dígitos
+   Explicação:
+   - Códigos de SMS/2FA nunca devem ser compartilhados por telefone, nem parcialmente
+   - Esse é o padrão clássico de ataque de SIM swap / bypass de autenticação de dois fatores
+   - Operadoras reais não pedem o código que elas mesmas enviaram
+
+------------------------------
+CATEGORIA 3: tailgating (Tailgating)
+------------------------------
+
+1. Situação: Na catraca, uma pessoa sem identificação pede pra você segurar a porta, dizendo que esqueceu o crachá no carro.
+   a) Segurar a porta, parece inofensivo
+   b) [CORRETA] Não segurar e orientar a pessoa a se identificar na recepção
+   c) Segurar só se a pessoa parecer confiável
+   Explicação:
+   - Tailgating é uma das formas mais comuns de acesso físico não autorizado
+   - "Parecer confiável" não é verificação — qualquer pessoa pode alegar isso
+   - Toda entrada sem crachá deve passar pela recepção/segurança, sem exceção
+
+2. Situação: Uma pessoa bem-vestida com pastas de documentos aproveita a porta automática aberta atrás de você pra entrar junto, sem encostar o crachá.
+   a) Deixar passar, parece ser alguém da empresa
+   b) [CORRETA] Pedir educadamente que a pessoa identifique o próprio acesso
+   c) Fingir não notar
+   Explicação:
+   - Aparência profissional não comprova autorização de acesso
+   - Tailgating costuma usar justamente essa confiança social pra passar despercebido
+   - Pedir identificação de acesso, mesmo que pareça chato, é a conduta correta
+
+3. Situação: Você encontra uma pessoa desconhecida, sem crachá de visitante, caminhando sozinha numa área restrita da empresa.
+   a) Ignorar, provavelmente é de outro departamento
+   b) [CORRETA] Abordar educadamente e acionar a segurança/recepção
+   c) Seguir a pessoa à distância sem falar nada
+   Explicação:
+   - Área restrita sem crachá visível é motivo suficiente para verificação imediata
+   - Acionar a segurança é mais eficaz do que confrontar ou apenas observar
+   - Ignorar permite que a pessoa continue circulando livremente em área sensível
+
+4. Situação: Um técnico diz estar atrasado pra um reparo emergencial no datacenter e pede pra você liberar a porta exclusiva com seu crachá.
+   a) Liberar a porta, já que é uma emergência
+   b) [CORRETA] Não liberar com seu próprio crachá — encaminhar para quem gerencia o acesso ao datacenter
+   c) Liberar, mas acompanhar a pessoa o tempo todo
+   Explicação:
+   - Usar seu crachá pra liberar acesso de terceiros quebra a rastreabilidade de quem entrou onde
+   - "Emergência" é frequentemente usada como pretexto pra pular verificações
+   - O procedimento correto é encaminhar para quem realmente gerencia esse acesso
+
+5. Situação: Um visitante com crachá de identificação pede pra entrar numa área confidencial sem o funcionário anfitrião responsável por ele.
+   a) Deixar entrar, já que ele tem crachá de visitante
+   b) [CORRETA] Não permitir a entrada sem o anfitrião presente
+   c) Acompanhar o visitante você mesmo, mesmo não sendo o anfitrião designado
+   Explicação:
+   - Crachá de visitante autoriza presença no prédio, não acesso livre a áreas confidenciais
+   - O anfitrião é quem responde pela presença do visitante — sem ele, não há supervisão real
+   - Substituir o anfitrião informalmente quebra o processo de responsabilização
+
+------------------------------
+CATEGORIA 4: usb (USB Desconhecido)
+------------------------------
+
+1. Situação: Você encontra um pendrive no estacionamento com a etiqueta "Bônus e Salários da Diretoria".
+   a) Conectar rapidinho só pra ver o que tem
+   b) [CORRETA] Não conectar e entregar para o time de segurança/TI
+   c) Levar pra casa e ver depois
+   Explicação:
+   - Pendrives "achados" com títulos chamativos são uma técnica clássica de ataque (USB drop attack)
+   - Mesmo "só olhar" pode executar malware automaticamente ao conectar
+   - Entregar para o time de segurança permite análise segura em ambiente controlado
+
+2. Situação: Em uma reunião presencial, um participante pede pra plugar o próprio pendrive direto no seu notebook corporativo pra mostrar os slides dele.
+   a) Plugar o pendrive dele no seu notebook
+   b) [CORRETA] Pedir pra ele enviar os slides por um canal corporativo aprovado
+   c) Plugar, mas só por alguns segundos
+   Explicação:
+   - Qualquer dispositivo USB de terceiro é uma fonte potencial de malware, mesmo de gente conhecida
+   - Pouco tempo conectado já é suficiente pra comprometer o sistema
+   - Canais corporativos (e-mail, nuvem homologada) evitam esse risco completamente
+
+3. Situação: Você encontra um cabo de carregador abandonado na sala de reuniões e seu celular corporativo está quase sem bateria.
+   a) Usar o cabo, é só um carregador
+   b) [CORRETA] Evitar usar cabos desconhecidos — eles podem transmitir dados, não só energia
+   c) Usar só pra uma carga rápida
+   Explicação:
+   - Cabos maliciosos ("juice jacking") podem transferir dados ou instalar malware via porta USB
+   - Não dá pra saber visualmente se um cabo foi alterado
+   - Levar seu próprio carregador/cabo é sempre a opção mais segura
+
+4. Situação: Você encontra um pendrive comum em cima da sua mesa e conecta pra tentar identificar o dono pelo conteúdo. Mas o Windows mostra "Instalando dispositivo: teclado USB" — nunca apareceu isso antes ao plugar um pendrive.
+   a) Ignorar o aviso, provavelmente é só uma atualização
+   b) [CORRETA] Desconectar o dispositivo imediatamente e avisar o time de segurança
+   c) Reiniciar o computador e seguir normalmente
+   Explicação:
+   - Dispositivos USB que se disfarçam de teclado ("USB Rubber Ducky") podem injetar comandos maliciosos automaticamente
+   - Esse comportamento não é uma atualização normal de sistema
+   - Desconectar e reportar rápido limita o dano potencial
+
+5. Situação: Um cliente insiste em entregar arquivos de contrato só em uma mídia USB física, em vez de e-mail ou nuvem homologada.
+   a) Conectar a mídia direto no seu notebook de trabalho
+   b) [CORRETA] Pedir pra passar por um processo seguro de verificação de mídia antes de qualquer conexão
+   c) Recusar o contrato completamente
+   Explicação:
+   - Mídia USB externa deve sempre passar por verificação antes de tocar em qualquer máquina da rede corporativa
+   - Conectar direto expõe toda a rede a um risco desnecessário
+   - Recusar o contrato não é necessário — existe um processo seguro pra isso
+
+------------------------------
+CATEGORIA 5: passwords (Senhas)
+------------------------------
+
+1. Situação: Um site de compras que você usa sofreu vazamento de dados, e você usava uma senha parecida com a do trabalho.
+   a) Não fazer nada, são contas diferentes
+   b) [CORRETA] Trocar imediatamente a senha corporativa também
+   c) Trocar só a senha do site de compras
+   Explicação:
+   - Senhas reutilizadas ou parecidas tornam um vazamento externo um risco direto pra conta corporativa
+   - Ataques de credential stuffing testam exatamente essas combinações vazadas em outros sistemas
+   - Trocar só a senha vazada não resolve se a senha corporativa for parecida
+
+2. Situação: Um colega pede sua senha de acesso a um sistema porque a dele foi bloqueada e ele precisa terminar um relatório urgente.
+   a) Passar a senha, é só dessa vez
+   b) [CORRETA] Negar e orientar o colega a resolver o bloqueio pelo canal oficial de TI
+   c) Passar a senha e trocar depois
+   Explicação:
+   - Senhas são pessoais e intransferíveis, mesmo entre colegas de confiança
+   - Compartilhar quebra a rastreabilidade de quem fez o quê no sistema
+   - O canal oficial de TI existe exatamente pra esses casos
+
+3. Situação: Na hora de trocar a senha, você pensa em só mudar o número do final (ex: de "Empresa2025!" pra "Empresa2026!").
+   a) Fazer isso, é mais fácil de lembrar
+   b) [CORRETA] Criar uma senha ou frase-senha totalmente nova e diferente
+   c) Trocar só um caractere no meio
+   Explicação:
+   - Padrões previsíveis (trocar só o ano) são facilmente testados por ferramentas de quebra de senha
+   - Uma senha "nova" que segue o padrão da anterior não traz segurança real
+   - Frases-senha longas e diferentes são mais seguras e ainda assim memorizáveis
+
+4. Situação: Você vai se ausentar da mesa por só 3 minutos pra pegar água.
+   a) Deixar o computador aberto, é rapidinho
+   b) [CORRETA] Travar a tela antes de sair, mesmo por pouco tempo
+   c) Só virar a tela pro lado
+   Explicação:
+   - Qualquer tempo é suficiente pra alguém acessar informações numa tela destravada
+   - Travar a tela é um hábito, não depende de quanto tempo você vai ficar fora
+   - Virar a tela não impede o acesso físico ao computador destravado
+
+5. Situação: Uma ferramenta corporativa pede que você configure uma senha temporária após a redefinição de acesso.
+   a) Manter a senha temporária mesmo depois do primeiro login
+   b) [CORRETA] Trocar por uma senha definitiva forte assim que possível
+   c) Usar a mesma senha temporária em outros sistemas também
+   Explicação:
+   - Senhas temporárias costumam ser simples e, às vezes, conhecidas por mais de uma pessoa (quem redefiniu)
+   - Trocar rápido por uma senha definitiva forte fecha essa janela de risco
+   - Reusar a senha temporária em outros sistemas espalha o mesmo risco
+
+------------------------------
+CATEGORIA 6: links (Links Suspeitos)
+------------------------------
+
+1. Situação: Um colega posta num canal geral do Teams um link encurtado dizendo "vejam as fotos da confraternização de ontem".
+   a) Clicar direto, é só um colega compartilhando fotos
+   b) [CORRETA] Checar o destino do link antes de clicar (passar o mouse por cima, ou perguntar ao colega)
+   c) Encaminhar o link pra outros colegas verem também
+   Explicação:
+   - Links encurtados escondem o destino real — contas comprometidas costumam postar assim
+   - Verificar antes de clicar é rápido e evita propagar um ataque
+   - Encaminhar sem checar multiplica o alcance de um possível link malicioso
+
+2. Situação: Num chat privado, um perfil com nome e foto de um diretor pede pra você clicar num link externo pra "assinar um documento urgente" numa plataforma desconhecida.
+   a) Clicar e assinar rápido, é o diretor pedindo
+   b) [CORRETA] Confirmar o pedido com o diretor por outro canal antes de clicar em qualquer link
+   c) Encaminhar pra outro colega decidir
+   Explicação:
+   - Perfis podem ser falsificados ou contas comprometidas — nome e foto não são prova de identidade
+   - Plataformas desconhecidas pra "assinatura urgente" são um padrão comum de golpe
+   - Confirmar por outro canal (ramal, mensagem direta já conhecida) desmonta a tentativa rapidamente
+
+3. Situação: Ao passar o mouse sobre um link num e-mail, sem clicar, o endereço mostrado embaixo é bem diferente do texto visível do link.
+   a) Clicar mesmo assim, o texto parece confiável
+   b) [CORRETA] Não clicar — isso é um forte sinal de link malicioso disfarçado
+   c) Copiar o link e colar no navegador pra testar
+   Explicação:
+   - Texto visível diferente do destino real é uma das formas mais comuns de disfarçar um link malicioso
+   - Copiar e colar ainda leva você ao mesmo destino perigoso
+   - O procedimento correto é não interagir e reportar o e-mail
+
+4. Situação: Um convite de calendário chega de um remetente desconhecido, com um anexo executável no corpo do convite.
+   a) Aceitar o convite e abrir o anexo depois
+   b) [CORRETA] Não abrir o anexo e reportar o convite como suspeito
+   c) Recusar o convite, mas abrir o anexo antes por curiosidade
+   Explicação:
+   - Arquivos executáveis (.exe) anexados a convites nunca são legítimos em fluxo normal de calendário
+   - Remetente desconhecido + executável é uma combinação de alto risco
+   - Reportar ajuda a bloquear o remetente pra outros colegas também
+
+5. Situação: Um link de e-mail leva a uma tela de login idêntica à da Microsoft, mas a barra de endereço mostra um domínio estranho tipo "login.microsoft.security-update.com".
+   a) Fazer login normalmente, a tela parece idêntica à de sempre
+   b) [CORRETA] Não inserir credenciais e reportar — domínio estranho é sinal de página falsa (phishing de credenciais)
+   c) Fazer login e depois trocar a senha por precaução
+   Explicação:
+   - Visual idêntico não garante autenticidade — páginas de phishing frequentemente clonam telas reais
+   - O domínio real da Microsoft nunca inclui esses subdomínios estranhos somados ao nome dela
+   - Inserir credenciais, mesmo que troque depois, já expõe a senha ao atacante
+
+================================================================================
+Gere agora todos os arquivos do projeto completos, testáveis e prontos para rodar com um servidor local simples (npx serve ou python3 -m http.server).
