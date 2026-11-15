@@ -40,13 +40,14 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            align-items: stretch;
+            justify-content: flex-start;
             background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
         }
         #phaser-container {
+            flex: 1 1 auto;
+            min-height: 0;
             width: 100%;
-            height: 100%;
         }
         #phaser-container canvas {
             border-radius: 12px;
@@ -88,7 +89,7 @@
 
 <div id="game-wrapper">
     <!-- 1. HUD SUPERIOR FIXO -->
-    <header id="top-hud" class="hidden fixed top-0 left-0 right-0 z-30 bg-slate-950/95 border-b-2 border-sky-500/50 px-3 py-2 shadow-xl backdrop-blur-md">
+    <header id="top-hud" class="hidden shrink-0 z-30 bg-slate-950/95 border-b-2 border-sky-500/50 px-3 py-2 shadow-xl backdrop-blur-md">
         <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <!-- Título e Sala Atual -->
             <div class="flex items-center gap-3">
@@ -3310,6 +3311,7 @@ class MenuScene extends Phaser.Scene {
     }
 
     create() {
+        this.scale.refresh();
         document.getElementById('menu-overlay').classList.remove('hidden');
         document.getElementById('top-hud').classList.add('hidden');
         document.getElementById('result-overlay').classList.add('hidden');
@@ -3359,6 +3361,7 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
+        this.scale.refresh();
         this.wallGroup = this.physics.add.staticGroup();
         this.obstacleGroup = this.wallGroup;
         this.npcColliderGroup = this.physics.add.staticGroup();
@@ -4350,6 +4353,7 @@ class ResultScene extends Phaser.Scene {
     }
 
     create() {
+        this.scale.refresh();
         document.getElementById('top-hud').classList.add('hidden');
         document.getElementById('result-overlay').classList.remove('hidden');
 
