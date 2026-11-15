@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pillars of Security | Sinch Security Team</title>
     <!-- Tailwind CSS (local, offline) -->
     <script src="vendor/tailwind.js"></script>
@@ -83,6 +83,63 @@
             background: #38bdf8;
             border-radius: 6px;
         }
+
+        /* ===== Controles touch (so em dispositivos touch, durante o jogo) ===== */
+        #touch-controls {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            z-index: 45;
+            display: none;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 14px 18px calc(14px + env(safe-area-inset-bottom));
+            pointer-events: none;
+        }
+        #touch-controls > * { pointer-events: auto; }
+        #tc-dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 52px);
+            grid-template-rows: repeat(3, 52px);
+            gap: 5px;
+        }
+        .tc-btn {
+            -webkit-user-select: none; user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: none;
+            background: rgba(15, 23, 42, 0.68);
+            border: 2px solid rgba(56, 189, 248, 0.6);
+            color: #e2e8f0;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+        .tc-btn.pressed { background: rgba(56, 189, 248, 0.45); }
+        .tc-up    { grid-area: 1 / 2 / 2 / 3; }
+        .tc-left  { grid-area: 2 / 1 / 3 / 2; }
+        .tc-right { grid-area: 2 / 3 / 3 / 4; }
+        .tc-down  { grid-area: 3 / 2 / 4 / 3; }
+        #tc-a {
+            width: 78px; height: 78px;
+            border-radius: 50%;
+            font-size: 22px;
+            background: rgba(2, 132, 199, 0.82);
+            border-color: rgba(125, 211, 252, 0.85);
+            color: #fff;
+        }
+
+        /* ===== Aviso de girar o celular (touch + retrato + em jogo) ===== */
+        #rotate-hint { display: none; }
+        @media (max-width: 860px) and (orientation: portrait) {
+            html.is-touch.in-game #rotate-hint {
+                display: flex;
+                position: fixed; inset: 0; z-index: 60;
+                flex-direction: column; align-items: center; justify-content: center;
+                gap: 18px; text-align: center; padding: 24px;
+                background: #0b1220; color: #e2e8f0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -135,7 +192,7 @@
             </div>
         </div>
         <!-- Mapa Linear das 5 Salas (Indicador Visual Claro de Posição Atual) -->
-        <div id="hud-room-stepper" class="max-w-6xl mx-auto mt-1.5 pt-1.5 border-t border-slate-800/90 grid grid-cols-5 gap-1.5"></div>
+        <div id="hud-room-stepper" class="max-w-6xl mx-auto mt-1.5 pt-1.5 border-t border-slate-800/90 hidden sm:grid grid-cols-5 gap-1.5"></div>
     </header>
 
     <!-- 2. TELA DE ABERTURA (MenuScene Overlay) -->
@@ -321,6 +378,24 @@
 
     <!-- Container do Canvas Phaser 3 -->
     <div id="phaser-container"></div>
+</div>
+
+<!-- Controles touch (mobile) -->
+<div id="touch-controls" aria-hidden="true">
+    <div id="tc-dpad">
+        <button type="button" class="tc-btn tc-up" data-dir="up" aria-label="Cima">▲</button>
+        <button type="button" class="tc-btn tc-left" data-dir="left" aria-label="Esquerda">◀</button>
+        <button type="button" class="tc-btn tc-right" data-dir="right" aria-label="Direita">▶</button>
+        <button type="button" class="tc-btn tc-down" data-dir="down" aria-label="Baixo">▼</button>
+    </div>
+    <button type="button" id="tc-a" class="tc-btn" aria-label="Interagir">A</button>
+</div>
+
+<!-- Aviso de girar o celular -->
+<div id="rotate-hint" aria-hidden="true">
+    <div style="font-size:46px;">📱</div>
+    <div style="font-family:'Press Start 2P',monospace; font-size:12px; line-height:1.7; color:#38bdf8;">GIRE O CELULAR</div>
+    <div style="font-size:14px; color:#94a3b8;">Vire na horizontal para jogar</div>
 </div>
 
 <script>
@@ -4171,6 +4246,9 @@ class GameScene extends Phaser.Scene {
     }
 
     update() {
+        const T = window.PILLARS_TOUCH || {};
+        const touchInteract = !!T.interact;
+        T.interact = false;
         if (GameState.isModalOpen || GameState.isPaused || GameState.isGameOver || this.doorTransitioning) {
             this.player.body.setVelocity(0, 0);
             this.player.play(`char_player_idle_${this.playerDir}`, true);
@@ -4182,10 +4260,10 @@ class GameScene extends Phaser.Scene {
         let vx = 0;
         let vy = 0;
 
-        const left = this.cursors.left.isDown || this.wasd.left.isDown;
-        const right = this.cursors.right.isDown || this.wasd.right.isDown;
-        const up = this.cursors.up.isDown || this.wasd.up.isDown;
-        const down = this.cursors.down.isDown || this.wasd.down.isDown;
+        const left = this.cursors.left.isDown || this.wasd.left.isDown || !!T.left;
+        const right = this.cursors.right.isDown || this.wasd.right.isDown || !!T.right;
+        const up = this.cursors.up.isDown || this.wasd.up.isDown || !!T.up;
+        const down = this.cursors.down.isDown || this.wasd.down.isDown || !!T.down;
 
         if (left) {
             vx = -speed;
@@ -4245,7 +4323,7 @@ class GameScene extends Phaser.Scene {
             );
             this.promptContainer.setVisible(true);
 
-            if (Phaser.Input.Keyboard.JustDown(this.wasd.space) || Phaser.Input.Keyboard.JustDown(this.wasd.enter)) {
+            if (Phaser.Input.Keyboard.JustDown(this.wasd.space) || Phaser.Input.Keyboard.JustDown(this.wasd.enter) || touchInteract) {
                 this.triggerInteraction(nearest);
             }
         } else {
@@ -4426,6 +4504,54 @@ window.onload = function () {
 
     phaserGameInstance = new Phaser.Game(config);
 };
+</script>
+
+<script>
+/* ============================================================================
+ * Controles touch para celular (direcional + botao A) e aviso de girar
+ * ========================================================================== */
+(function () {
+    window.PILLARS_TOUCH = { up: false, down: false, left: false, right: false, interact: false };
+
+    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    const tc = document.getElementById('touch-controls');
+    if (!isTouch) {
+        if (tc) tc.remove();
+        return;
+    }
+    document.documentElement.classList.add('is-touch');
+
+    // Mostra os controles (e marca "em jogo") junto com o HUD do topo
+    const hud = document.getElementById('top-hud');
+    const syncInGame = () => {
+        const inGame = hud && !hud.classList.contains('hidden');
+        document.documentElement.classList.toggle('in-game', inGame);
+        if (tc) tc.style.display = inGame ? 'flex' : 'none';
+    };
+    if (hud) new MutationObserver(syncInGame).observe(hud, { attributes: true, attributeFilter: ['class'] });
+    syncInGame();
+
+    const setDir = (dir, val) => { window.PILLARS_TOUCH[dir] = val; };
+    const press = (el) => el && el.classList.add('pressed');
+    const release = (el) => el && el.classList.remove('pressed');
+
+    document.querySelectorAll('#tc-dpad [data-dir]').forEach((el) => {
+        const dir = el.dataset.dir;
+        const on = (e) => { e.preventDefault(); setDir(dir, true); press(el); };
+        const off = (e) => { e.preventDefault(); setDir(dir, false); release(el); };
+        el.addEventListener('touchstart', on, { passive: false });
+        el.addEventListener('touchend', off, { passive: false });
+        el.addEventListener('touchcancel', off, { passive: false });
+    });
+
+    const aBtn = document.getElementById('tc-a');
+    if (aBtn) {
+        aBtn.addEventListener('touchstart', (e) => { e.preventDefault(); window.PILLARS_TOUCH.interact = true; press(aBtn); }, { passive: false });
+        const rel = (e) => { e.preventDefault(); release(aBtn); };
+        aBtn.addEventListener('touchend', rel, { passive: false });
+        aBtn.addEventListener('touchcancel', rel, { passive: false });
+    }
+})();
 </script>
 </body>
 </html>
