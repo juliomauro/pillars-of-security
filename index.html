@@ -3499,18 +3499,6 @@ class GameScene extends Phaser.Scene {
         const roomAccentColors = [0x0284c7, 0xd97706, 0x10b981, 0xeab308, 0x9333ea];
         const accentHex = roomAccentColors[roomIndex] || 0x0284c7;
 
-        const signBg = this.add.rectangle(480, 100, 350, 30, 0x0f172a, 0.94)
-            .setStrokeStyle(2, accentHex)
-            .setDepth(590);
-        this.roomLayer.add(signBg);
-
-        const roomBanner = this.add.text(480, 100, `${roomIcons[roomIndex]} ${t.rooms[roomIndex].toUpperCase()} (${roomIndex + 1}/5)`, {
-            fontFamily: '"Press Start 2P", monospace',
-            fontSize: '10px',
-            color: '#fef08a'
-        }).setOrigin(0.5).setDepth(600);
-        this.roomLayer.add(roomBanner);
-
         const floorWatermark = this.add.text(480, 518, `📍 ${t.rooms[roomIndex].toUpperCase()} — ${(t.roomSubtitles && t.roomSubtitles[roomIndex]) || ''}`, {
             fontFamily: 'Inter, sans-serif',
             fontSize: '12px',
@@ -3612,7 +3600,7 @@ class GameScene extends Phaser.Scene {
             this.createCoworker(555, 235, 3, 'down', false, '💼');
             this.createCoworker(615, 185, 0, 'left', true, '📑');
             this.createCoworker(785, 245, 2, 'down', false, '🔒');
-            this.createCoworker(395, 365, 5, 'left', false, '💰');
+            this.createCoworker(165, 150, 5, 'down', false, '💰');
             this.createCoworker(725, 435, 4, 'right', false, '📊');
             this.createCoworker(285, 455, 1, 'right', false, '☕');
 
@@ -3922,21 +3910,23 @@ class GameScene extends Phaser.Scene {
         this.roomLayer.add(topPanel);
         this.roomLayer.add(bottomPanel);
 
+        // Placa de sinalizacao montada ao lado da porta (nao parece fala de NPC)
         const t = I18N[GameState.lang];
-        const arrowTxt = side === 'right' ? `▶` : `◀`;
-        const labelObj = this.add.text(
-            side === 'right' ? x - 34 : x + 34,
-            y - 54,
-            `${arrowTxt} ${t.rooms[targetRoomIndex]}`,
-            {
-                fontFamily: 'Inter, sans-serif',
-                fontSize: '11px',
-                fontStyle: 'bold',
-                color: '#38bdf8',
-                backgroundColor: '#0f172a',
-                padding: { x: 6, y: 3 }
-            }
-        ).setOrigin(side === 'right' ? 1 : 0, 0.5).setDepth(800);
+        const arrowTxt = side === 'right' ? '▶' : '◀';
+        const signLabel = this.add.text(0, 0, t.rooms[targetRoomIndex], {
+            fontFamily: 'Inter, sans-serif', fontSize: '10px', fontStyle: 'bold', color: '#dbeafe'
+        }).setOrigin(0, 0.5);
+        const signArrow = this.add.text(0, 0, arrowTxt, {
+            fontFamily: 'Inter, sans-serif', fontSize: '11px', fontStyle: 'bold', color: '#38bdf8'
+        }).setOrigin(0, 0.5);
+        const signPadX = 8, signGap = 5;
+        const signPlateW = signArrow.width + signGap + signLabel.width + signPadX * 2;
+        const signPlate = this.add.rectangle(0, 0, signPlateW, 19, 0x0b1220, 0.97)
+            .setStrokeStyle(2, 0x38bdf8).setOrigin(0.5);
+        signArrow.setPosition(-signPlateW / 2 + signPadX, 0);
+        signLabel.setPosition(signArrow.x + signArrow.width + signGap, 0);
+        const signX = side === 'right' ? (x - signPlateW / 2 - 8) : (x + signPlateW / 2 + 8);
+        const labelObj = this.add.container(signX, y - 44, [signPlate, signArrow, signLabel]).setDepth(880);
         this.roomLayer.add(labelObj);
 
         this.interactables.push({
