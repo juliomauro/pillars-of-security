@@ -3316,11 +3316,7 @@ class MenuScene extends Phaser.Scene {
         document.getElementById('result-overlay').classList.add('hidden');
         VoxelArtGenerator.renderHTMLSinchLogos();
 
-        for (let y = 0; y < 12; y++) {
-            for (let x = 0; x < 20; x++) {
-                this.add.image(x * 48 + 24, y * 48 + 24, 'tile_floor_0').setAlpha(0.75);
-            }
-        }
+        this.cameras.main.setBackgroundColor('#141c28');
 
         // preview de personagens removido da tela inicial
     }
