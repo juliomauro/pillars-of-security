@@ -182,7 +182,7 @@
 </svg>
 <script>
 (function () {
-    var KEY = 'pillars-dmg', on = true;
+    var KEY = 'pillars-dmg', on = false;
     try { var s = localStorage.getItem(KEY); if (s !== null) on = (s === '1'); } catch (e) {}
     document.body.classList.toggle('dmg', on);
     function syncLabel() {
